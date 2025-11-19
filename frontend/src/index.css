@@ -1,0 +1,19 @@
+/* Global CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* REMOVE background here */
+}
+
+/* CSS Variables for your weather app */
+:root {
+  --sky-blue: #87CEEB;
+  --sunny-yellow: #FFD700;
+  --rainy-gray: #6C757D;
+  --text-dark: #2C3E50;
+}
