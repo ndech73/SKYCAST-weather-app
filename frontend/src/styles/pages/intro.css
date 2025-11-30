@@ -193,3 +193,26 @@
     letter-spacing: 1px;
   }
 }
+
+/* Add these to your existing intro.css */
+
+.debug-info {
+  font-family: 'Courier New', monospace;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.debug-info div {
+  margin: 2px 0;
+  opacity: 0.9;
+}
+
+/* Ensure debug info doesn't interfere with main content */
+.intro-container {
+  position: relative;
+}
+
+/* Image error fallback */
+.intro-logo[style*="display: none"] + .intro-title {
+  margin-top: 2rem; /* Adjust if logo fails to load */
+}
