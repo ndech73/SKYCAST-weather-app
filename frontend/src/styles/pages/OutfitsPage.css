@@ -1,0 +1,299 @@
+.outfits-page {
+  width: 100%;
+}
+
+.outfits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.outfits-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.outfits-header p {
+  margin: 0;
+  color: #718096;
+}
+
+.weather-context {
+  text-align: right;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  color: white;
+  min-width: 150px;
+}
+
+.current-temp {
+  font-size: 2rem;
+  font-weight: 700;
+  display: block;
+}
+
+.current-condition {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.preferences-panel {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.preferences-panel h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+}
+
+.preference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.preference-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.preference-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pref-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.pref-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.pref-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.recommendations-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.recommendations-section h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.outfit-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.outfit-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.outfit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.outfit-header h4 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+.match-badge {
+  background: #48bb78;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.outfit-description {
+  color: #718096;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.outfit-items {
+  margin-bottom: 1.5rem;
+}
+
+.outfit-items h5 {
+  margin: 0 0 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.outfit-items ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #718096;
+}
+
+.outfit-items li {
+  margin-bottom: 0.25rem;
+}
+
+.outfit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-outfit-btn,
+.share-outfit-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.save-outfit-btn {
+  background: #667eea;
+  color: white;
+}
+
+.save-outfit-btn:hover {
+  background: #764ba2;
+}
+
+.share-outfit-btn {
+  background: #e0e0e0;
+  color: #4a5568;
+}
+
+.share-outfit-btn:hover {
+  background: #d0d0d0;
+}
+
+.no-recommendations {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.no-rec-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.no-recommendations h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.no-recommendations p {
+  color: #718096;
+  margin: 0;
+}
+
+.outfit-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.outfit-stats .stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.outfit-stats .stat-icon {
+  font-size: 2rem;
+}
+
+.outfit-stats .stat-info {
+  flex: 1;
+}
+
+.outfit-stats .stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.outfit-stats .stat-label {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+@media (max-width: 768px) {
+  .outfits-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .weather-context {
+    align-self: stretch;
+    text-align: center;
+  }
+  
+  .preference-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .preference-buttons {
+    flex-direction: column;
+  }
+  
+  .pref-btn {
+    width: 100%;
+  }
+  
+  .outfit-actions {
+    flex-direction: column;
+  }
+}

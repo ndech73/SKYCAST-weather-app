@@ -1,0 +1,361 @@
+.dashboard-sidebar {
+  width: 250px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* DESKTOP: Collapsed state */
+.dashboard-sidebar.collapsed:not(.mobile-open) {
+  width: 60px;
+  padding: 1.5rem 0.5rem;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  white-space: nowrap;
+  font-weight: 600;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* DESKTOP: Hide title when collapsed */
+.dashboard-sidebar.collapsed:not(.mobile-open) .sidebar-header h2 {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(3px);
+}
+
+.nav-btn.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-left: 3px solid white;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.nav-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+  opacity: 1;
+}
+
+/* DESKTOP: Hide labels when collapsed */
+.dashboard-sidebar.collapsed:not(.mobile-open) .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* Logout button specific styling */
+.nav-btn[title="Logout"] {
+  margin-top: auto;
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.nav-btn[title="Logout"]:hover {
+  background: rgba(220, 53, 69, 0.3);
+}
+
+/* MOBILE RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .dashboard-sidebar {
+    transform: translateX(-100%);
+    width: 250px;
+    padding: 1.5rem 1rem;
+  }
+  
+  .dashboard-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  /* Mobile hamburger menu button */
+  .mobile-menu-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: #667eea;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    min-width: 40px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  
+  /* Always show labels on mobile when sidebar is open */
+  .dashboard-sidebar.mobile-open .nav-label {
+    opacity: 1;
+    width: auto;
+    overflow: visible;
+  }
+  
+  .dashboard-sidebar.mobile-open .sidebar-header h2 {
+    opacity: 1;
+    width: auto;
+    overflow: visible;
+  }
+}
+
+/* Add these styles */
+.sidebar-title {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.sidebar-title:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.logout-btn {
+  margin-top: auto;
+  background: rgba(220, 53, 69, 0.2) !important;
+  border: 1px solid rgba(220, 53, 69, 0.3) !important;
+}
+
+.logout-btn:hover {
+  background: rgba(220, 53, 69, 0.3) !important;
+}
+
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* DESKTOP: Don't apply mobile styles */
+@media (min-width: 769px) {
+  .mobile-menu-btn,
+  .mobile-overlay {
+    display: none !important;
+  }
+  
+  .dashboard-sidebar {
+    transform: translateX(0) !important;
+  }
+}
+/* Logout Modal Styles */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.logout-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.logout-modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.logout-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.logout-modal-message {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.logout-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logout-modal-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #d0d0d0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-btn {
+  background-color: #ff4444;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+}
+
+.logout-modal-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .logout-modal {
+    padding: 24px;
+    width: 95%;
+  }
+  
+  .logout-modal-title {
+    font-size: 20px;
+  }
+  
+  .logout-modal-message {
+    font-size: 14px;
+  }
+  
+  .logout-modal-actions {
+    flex-direction: column;
+  }
+  
+  .logout-modal-btn {
+    width: 100%;
+  }
+}

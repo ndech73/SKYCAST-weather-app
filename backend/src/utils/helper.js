@@ -1,0 +1,74 @@
+/**
+ * Validates coordinates
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @returns {boolean} True if coordinates are valid
+ */
+function validateCoordinates(lat, lon) {
+  return !isNaN(lat) && !isNaN(lon) && 
+         lat >= -90 && lat <= 90 && 
+         lon >= -180 && lon <= 180;
+}
+
+/**
+ * Formats weather data for consistent response
+ * @param {Object} data - Raw weather data
+ * @returns {Object} Formatted weather data
+ */
+function formatWeatherResponse(data) {
+  return {
+    name: data.name,
+    main: {
+      temp: data.main?.temp,
+      feels_like: data.main?.feels_like,
+      humidity: data.main?.humidity,
+      pressure: data.main?.pressure,
+      temp_min: data.main?.temp_min,
+      temp_max: data.main?.temp_max
+    },
+    weather: data.weather || [],
+    wind: data.wind || {},
+    clouds: data.clouds || {},
+    rain: data.rain || {},
+    snow: data.snow || {},
+    visibility: data.visibility,
+    dt: data.dt,
+    timezone: data.timezone
+  };
+}
+
+/**
+ * Delays execution for specified milliseconds
+ * @param {number} ms - Milliseconds to delay
+ * @returns {Promise} Promise that resolves after delay
+ */
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Calculates distance between two coordinates in kilometers
+ * @param {number} lat1 - Latitude of point 1
+ * @param {number} lon1 - Longitude of point 1
+ * @param {number} lat2 - Latitude of point 2
+ * @param {number} lon2 - Longitude of point 2
+ * @returns {number} Distance in kilometers
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+export {
+  validateCoordinates,
+  formatWeatherResponse,
+  delay,
+  calculateDistance
+};

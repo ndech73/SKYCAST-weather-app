@@ -1,0 +1,103 @@
+.dashboard-content {
+  margin-left: 250px;
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f8f9fa;
+  transition: margin-left 0.3s ease;
+  width: calc(100% - 250px);
+  box-sizing: border-box;
+}
+
+.dashboard-content.collapsed {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.content-header h1 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.action-btn:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+/* Page content area should expand to fill space */
+.overview-page,
+.radar-page,
+.history-page,
+.outfits-page,
+.favorites-page,
+.settings-page {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  min-height: calc(100vh - 200px);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .dashboard-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 1rem;
+    padding-top: 4rem; /* Space for mobile menu button */
+  }
+  
+  .content-header {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .content-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .overview-page,
+  .radar-page,
+  .history-page,
+  .outfits-page,
+  .favorites-page,
+  .settings-page {
+    padding: 1rem;
+    min-height: calc(100vh - 180px);
+  }
+}

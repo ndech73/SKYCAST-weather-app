@@ -11,7 +11,7 @@ export default function Login() {
   const [attempts, setAttempts] = useState(0);
   const [lockoutTime, setLockoutTime] = useState(null);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // Enhanced password validation with special characters
   const validatePassword = (password) => {
@@ -125,7 +125,7 @@ export default function Login() {
         }),
       });
 
-      // Try to parse JSON whether ok or not (backend should return helpful messages)
+      // Try to parse JSON whether ok or not
       let data;
       try {
         data = await response.json();
@@ -170,9 +170,14 @@ export default function Login() {
         // Store authentication state securely
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userEmail", data.user.email);
-        localStorage.setItem("userName", data.user.username); // Updated to use username
-        localStorage.setItem("userId", data.user.id); // Store user ID
+        localStorage.setItem("userName", data.user.username);
+        localStorage.setItem("userId", data.user.id);
         localStorage.setItem("loginTime", new Date().toISOString());
+        
+        console.log("✅ Login successful, authentication data stored");
+        console.log("  - isAuthenticated: true");
+        console.log("  - userId:", data.user.id);
+        console.log("  - userEmail:", data.user.email);
         
         setMessage("Login successful! Redirecting...");
         setTimeout(() => {
@@ -280,7 +285,7 @@ export default function Login() {
                 type="button"
                 className="password-toggle-btn"
                 onClick={togglePasswordVisibility}
-                tabIndex={-1} // Prevent tab focus on toggle button
+                tabIndex={-1}
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
@@ -340,7 +345,7 @@ export default function Login() {
           </div>
         )}
 
-        {/* ADDED: Register link */}
+        {/* Register link */}
         <div className="register-link">
           <p>Don't have an account? <Link to="/register">Sign up here</Link></p>
         </div>

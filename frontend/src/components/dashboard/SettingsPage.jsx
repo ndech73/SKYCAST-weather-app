@@ -1,0 +1,568 @@
+import React, { useState, useEffect, useRef } from 'react';
+import '../../styles/pages/SettingsPage.css';
+
+const SettingsPage = () => {
+  const [settings, setSettings] = useState({
+    units: 'metric',
+    theme: 'auto',
+    notifications: true,
+    locationAccess: true,
+    dataSharing: false,
+    autoRefresh: true,
+    language: 'en',
+    timeFormat: '24h'
+  });
+
+  const [userProfile, setUserProfile] = useState({
+    name: '',
+    email: '',
+    location: '',
+    avatar: '👤',
+    avatarImage: null // Store uploaded image as base64
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = () => {
+    const savedSettings = JSON.parse(localStorage.getItem('weatherAppSettings')) || settings;
+    const savedProfile = JSON.parse(localStorage.getItem('userProfile')) || userProfile;
+    setSettings(savedSettings);
+    setUserProfile(savedProfile);
+  };
+
+  const handleSettingChange = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleProfileChange = (key, value) => {
+    setUserProfile(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setSaveMessage('Please upload a valid image file');
+        setTimeout(() => setSaveMessage(''), 3000);
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setSaveMessage('Image size must be less than 5MB');
+        setTimeout(() => setSaveMessage(''), 3000);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedProfile = {
+          ...userProfile,
+          avatarImage: reader.result,
+          avatar: null
+        };
+        setUserProfile(updatedProfile);
+        
+        // Immediately save to localStorage and notify other components
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
+          detail: updatedProfile 
+        }));
+        
+        setSaveMessage('Profile image updated!');
+        setTimeout(() => setSaveMessage(''), 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUserProfile(prev => ({
+      ...prev,
+      avatarImage: null,
+      avatar: '👤'
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const saveUserProfile = () => {
+    // Validate required fields
+    if (!userProfile.name.trim()) {
+      setSaveMessage('Please enter your name');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    if (!userProfile.email.trim()) {
+      setSaveMessage('Please enter your email');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userProfile.email)) {
+      setSaveMessage('Please enter a valid email address');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    if (!userProfile.location.trim()) {
+      setSaveMessage('Please enter your default location');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    
+    // Save to localStorage
+    setTimeout(() => {
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
+        detail: userProfile 
+      }));
+      
+      setIsSaving(false);
+      setSaveMessage('Profile saved successfully!');
+      
+      setTimeout(() => setSaveMessage(''), 3000);
+    }, 800);
+  };
+
+  const saveSettings = () => {
+    setIsSaving(true);
+    
+    setTimeout(() => {
+      localStorage.setItem('weatherAppSettings', JSON.stringify(settings));
+      setIsSaving(false);
+      setSaveMessage('Settings saved successfully!');
+      
+      setTimeout(() => setSaveMessage(''), 3000);
+    }, 1000);
+  };
+
+  const resetToDefaults = () => {
+    if (window.confirm('Are you sure you want to reset all settings to defaults?')) {
+      const defaults = {
+        units: 'metric',
+        theme: 'auto',
+        notifications: true,
+        locationAccess: true,
+        dataSharing: false,
+        autoRefresh: true,
+        language: 'en',
+        timeFormat: '24h'
+      };
+      setSettings(defaults);
+      setSaveMessage('Settings reset to defaults');
+      setTimeout(() => setSaveMessage(''), 3000);
+    }
+  };
+
+  const exportData = () => {
+    const data = {
+      settings,
+      userProfile: {
+        ...userProfile,
+        avatarImage: userProfile.avatarImage ? '[Image Data]' : null // Don't export full image
+      },
+      exportDate: new Date().toISOString()
+    };
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `skycast-settings-${new Date().getTime()}.json`;
+    link.click();
+  };
+
+  return (
+    <div className="settings-page">
+      <div className="settings-header">
+        <div>
+          <h2>⚙️ Settings</h2>
+          <p>Customize your SkyCast experience</p>
+        </div>
+        {saveMessage && (
+          <div className={`save-message ${saveMessage.includes('successfully') ? 'success' : 'error'}`}>
+            {saveMessage.includes('successfully') ? '✅' : '⚠️'} {saveMessage}
+          </div>
+        )}
+      </div>
+
+      <div className="settings-grid">
+        {/* User Profile Section */}
+        <div className="settings-section">
+          <h3>👤 User Profile</h3>
+          <div className="profile-card">
+            <div className="avatar-selector">
+              <div className="avatar-preview">
+                {userProfile.avatarImage ? (
+                  <img 
+                    src={userProfile.avatarImage} 
+                    alt="Profile" 
+                    className="avatar-image"
+                  />
+                ) : (
+                  <span className="avatar-emoji">{userProfile.avatar}</span>
+                )}
+              </div>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+              />
+              
+              <div className="avatar-actions">
+                <button 
+                  className="upload-btn"
+                  onClick={handleUploadClick}
+                  title="Upload your photo"
+                >
+                  📷 Upload Photo
+                </button>
+                
+                {userProfile.avatarImage && (
+                  <button 
+                    className="remove-btn"
+                    onClick={handleRemoveImage}
+                    title="Remove photo"
+                  >
+                    🗑️ Remove
+                  </button>
+                )}
+              </div>
+              
+              {!userProfile.avatarImage && (
+                <>
+                  <div className="avatar-divider">
+                    <span>or choose emoji</span>
+                  </div>
+                  <div className="avatar-options">
+                    {['👤', '👨', '👩', '🧑', '👨‍💼', '👩‍💼', '🧙', '🦸'].map(avatar => (
+                      <button
+                        key={avatar}
+                        className={`avatar-option ${userProfile.avatar === avatar && !userProfile.avatarImage ? 'selected' : ''}`}
+                        onClick={() => handleProfileChange('avatar', avatar)}
+                      >
+                        {avatar}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="profile-form">
+              <div className="form-group">
+                <label>Name *</label>
+                <input
+                  type="text"
+                  value={userProfile.name}
+                  onChange={(e) => handleProfileChange('name', e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Email *</label>
+                <input
+                  type="email"
+                  value={userProfile.email}
+                  onChange={(e) => handleProfileChange('email', e.target.value)}
+                  placeholder="email@example.com"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Default Location *</label>
+                <input
+                  type="text"
+                  value={userProfile.location}
+                  onChange={(e) => handleProfileChange('location', e.target.value)}
+                  placeholder="e.g., Nairobi, Kenya"
+                  required
+                />
+              </div>
+
+              <button 
+                className="save-profile-btn"
+                onClick={saveUserProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? '💾 Saving...' : '💾 Save Profile'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Weather Preferences */}
+        <div className="settings-section">
+          <h3>🌤️ Weather Preferences</h3>
+          <div className="preferences-grid">
+            <div className="preference-item">
+              <label>Units System</label>
+              <div className="radio-group">
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="units"
+                    checked={settings.units === 'metric'}
+                    onChange={() => handleSettingChange('units', 'metric')}
+                  />
+                  <span className="radio-text">Metric (°C, km/h)</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="units"
+                    checked={settings.units === 'imperial'}
+                    onChange={() => handleSettingChange('units', 'imperial')}
+                  />
+                  <span className="radio-text">Imperial (°F, mph)</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="preference-item">
+              <label>Time Format</label>
+              <div className="radio-group">
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="timeFormat"
+                    checked={settings.timeFormat === '24h'}
+                    onChange={() => handleSettingChange('timeFormat', '24h')}
+                  />
+                  <span className="radio-text">24-hour</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="timeFormat"
+                    checked={settings.timeFormat === '12h'}
+                    onChange={() => handleSettingChange('timeFormat', '12h')}
+                  />
+                  <span className="radio-text">12-hour</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="preference-item">
+              <label>Auto-refresh Data</label>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.autoRefresh}
+                  onChange={(e) => handleSettingChange('autoRefresh', e.target.checked)}
+                  id="autoRefresh"
+                />
+                <label htmlFor="autoRefresh" className="toggle-slider"></label>
+                <span className="toggle-text">
+                  {settings.autoRefresh ? 'Enabled (every 15min)' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* App Settings */}
+        <div className="settings-section">
+          <h3>📱 App Settings</h3>
+          <div className="toggle-grid">
+            <div className="toggle-item">
+              <div className="toggle-info">
+                <h4>Push Notifications</h4>
+                <p>Receive weather alerts and updates</p>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.notifications}
+                  onChange={(e) => handleSettingChange('notifications', e.target.checked)}
+                  id="notifications"
+                />
+                <label htmlFor="notifications" className="toggle-slider"></label>
+              </div>
+            </div>
+
+            <div className="toggle-item">
+              <div className="toggle-info">
+                <h4>Location Access</h4>
+                <p>Allow automatic location detection</p>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.locationAccess}
+                  onChange={(e) => handleSettingChange('locationAccess', e.target.checked)}
+                  id="locationAccess"
+                />
+                <label htmlFor="locationAccess" className="toggle-slider"></label>
+              </div>
+            </div>
+
+            <div className="toggle-item">
+              <div className="toggle-info">
+                <h4>Data Sharing</h4>
+                <p>Share anonymous usage data to improve app</p>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.dataSharing}
+                  onChange={(e) => handleSettingChange('dataSharing', e.target.checked)}
+                  id="dataSharing"
+                />
+                <label htmlFor="dataSharing" className="toggle-slider"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Theme & Appearance */}
+        <div className="settings-section">
+          <h3>🎨 Theme & Appearance</h3>
+          <div className="theme-selector">
+            {[
+              { id: 'auto', name: 'Auto', icon: '🌓', desc: 'Follow system theme' },
+              { id: 'light', name: 'Light', icon: '☀️', desc: 'Light mode' },
+              { id: 'dark', name: 'Dark', icon: '🌙', desc: 'Dark mode' },
+              { id: 'weather', name: 'Weather', icon: '🌈', desc: 'Theme based on weather' }
+            ].map(theme => (
+              <div
+                key={theme.id}
+                className={`theme-option ${settings.theme === theme.id ? 'selected' : ''}`}
+                onClick={() => handleSettingChange('theme', theme.id)}
+              >
+                <div className="theme-icon">{theme.icon}</div>
+                <div className="theme-info">
+                  <h4>{theme.name}</h4>
+                  <p>{theme.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Language */}
+        <div className="settings-section">
+          <h3>🌐 Language</h3>
+          <div className="language-selector">
+            <select
+              value={settings.language}
+              onChange={(e) => handleSettingChange('language', e.target.value)}
+              className="language-select"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="sw">Kiswahili</option>
+              <option value="ar">العربية</option>
+              <option value="zh">中文</option>
+            </select>
+            <p className="language-note">More languages coming soon!</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="settings-actions">
+        <button 
+          className="action-btn primary-btn"
+          onClick={saveSettings}
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : '💾 Save All Settings'}
+        </button>
+        
+        <button 
+          className="action-btn secondary-btn"
+          onClick={resetToDefaults}
+        >
+          🔄 Reset to Defaults
+        </button>
+        
+        <button 
+          className="action-btn export-btn"
+          onClick={exportData}
+        >
+          📥 Export Settings
+        </button>
+      </div>
+
+      <div className="advanced-settings">
+        <h3>🔧 Advanced Settings</h3>
+        <div className="advanced-grid">
+          <div className="advanced-item">
+            <h4>API Configuration</h4>
+            <p>Configure weather data sources</p>
+            <button className="advanced-action">Configure</button>
+          </div>
+          
+          <div className="advanced-item">
+            <h4>Cache Management</h4>
+            <p>Clear cached weather data</p>
+            <button className="advanced-action">Clear Cache</button>
+          </div>
+          
+          <div className="advanced-item">
+            <h4>Privacy Controls</h4>
+            <p>Manage your privacy settings</p>
+            <button className="advanced-action">Privacy</button>
+          </div>
+          
+          <div className="advanced-item">
+            <h4>Account Security</h4>
+            <p>Change password & 2FA</p>
+            <button className="advanced-action">Security</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="app-info">
+        <h3>ℹ️ App Information</h3>
+        <div className="info-grid">
+          <div className="info-item">
+            <span className="info-label">Version</span>
+            <span className="info-value">2.1.0</span>
+          </div>
+          <div className="info-item">
+            <span className="info-label">Last Updated</span>
+            <span className="info-value">2024-12-01</span>
+          </div>
+          <div className="info-item">
+            <span className="info-label">Data Provider</span>
+            <span className="info-value">WeatherAPI.com</span>
+          </div>
+          <div className="info-item">
+            <span className="info-label">Support</span>
+            <span className="info-value">support@skycast.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SettingsPage;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/searchBar';
 import WeatherCard from '../components/weatherCard';
 import Forecast from '../components/Forecast';
-import { weatherAPI } from '../scripts/weatherAPI';
 import '../styles/pages/home.css';
 
 const Home = () => {
@@ -10,6 +10,7 @@ const Home = () => {
   const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSearch = async (city) => {
     if (!city || city.trim() === '') {
@@ -25,13 +26,95 @@ const Home = () => {
     try {
       console.log('🔍 Searching for:', city);
       
-      const currentWeather = await weatherAPI.getCurrentWeather(city);
-      console.log('✅ Current weather:', currentWeather);
-      setWeatherData(currentWeather);
+      const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        city.trim()
+      )}&format=jsonv2&accept-language=en&limit=1`;
       
-      const forecast = await weatherAPI.getForecast(city);
-      console.log('✅ Forecast:', forecast);
-      setForecastData(forecast);
+      const geoRes = await fetch(geoUrl, {
+        headers: { 
+          "Accept-Language": "en", 
+          "User-Agent": "SkyCastApp/1.0" 
+        }
+      });
+      
+      if (!geoRes.ok) {
+        throw new Error('Geocoding service unavailable');
+      }
+      
+      const geoData = await geoRes.json();
+      
+      if (!geoData?.length) {
+        setError('City not found. Please check the spelling and try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { lat, lon, display_name } = geoData[0];
+      console.log(`✅ Geocoded: ${display_name} -> lat: ${lat}, lon: ${lon}`);
+      
+      const weatherRes = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+      
+      if (!weatherRes.ok) {
+        const errorData = await weatherRes.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch weather data');
+      }
+      
+      const weatherResponse = await weatherRes.json();
+      console.log('✅ Current weather:', weatherResponse);
+      
+      const transformedWeather = {
+        coord: weatherResponse.coord,
+        name: weatherResponse.location.name || display_name.split(',')[0],
+        sys: { 
+          country: weatherResponse.location.country 
+        },
+        main: {
+          temp: weatherResponse.temp,
+          humidity: weatherResponse.humidity,
+          feels_like: weatherResponse.temp,
+          temp_min: weatherResponse.temp,
+          temp_max: weatherResponse.temp,
+          pressure: 1013
+        },
+        wind: { 
+          speed: weatherResponse.wind 
+        },
+        clouds: { 
+          all: weatherResponse.cloud 
+        },
+        weather: [{
+          main: weatherResponse.cloud > 50 ? 'Clouds' : 'Clear',
+          description: weatherResponse.cloud > 50 ? 'cloudy' : 'clear sky',
+          icon: weatherResponse.cloud > 50 ? '04d' : '01d'
+        }],
+        dt: Math.floor(Date.now() / 1000),
+        aqi: weatherResponse.aqi,
+        aqi_label: weatherResponse.aqi_label,
+        snow: weatherResponse.snow,
+        display_name: display_name
+      };
+      
+      setWeatherData(transformedWeather);
+      
+      // --- START OF FIX ---
+      // Step 3: Fetch forecast using the correct lat/lon endpoint.
+      try {
+        // Use the same lat and lon from geocoding for consistency.
+        const forecastRes = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+        if (forecastRes.ok) {
+          const forecast = await forecastRes.json();
+          console.log('✅ Forecast:', forecast);
+          // Assuming the forecast data is in a 'data' property or is the root object
+          setForecastData(forecast.data || forecast);
+        } else {
+          console.warn('⚠️ Forecast not available, continuing without it.');
+          setForecastData(null);
+        }
+      } catch (forecastErr) {
+        console.warn('⚠️ Forecast fetch failed:', forecastErr.message);
+        setForecastData(null);
+      }
+      // --- END OF FIX ---
       
     } catch (err) {
       console.error('❌ Search error:', err);
@@ -43,9 +126,13 @@ const Home = () => {
 
   const clearError = () => setError('');
 
-  const handleContinueToDashboard = () => {
+  const handleContinueToDashboard = (e) => {
+    e.preventDefault();
     console.log('🚀 Continuing to dashboard with data:', { weatherData, forecastData });
-    alert('Continuing to Dashboard! Implement your navigation logic here.');
+    navigate('/dashboard', { 
+      replace: true,
+      state: { weatherData, forecastData }
+    });
   };
 
   return (
@@ -98,29 +185,33 @@ const Home = () => {
         )}
 
         <div className="weather-content">
-          <WeatherCard 
-            weatherData={weatherData}
-            loading={loading}
-            error={error}
-          />
-
-          {/* FIXED: Show dashboard button when we have weather data, even if forecast fails */}
+          {/* This component will now correctly receive forecastData */}
           {weatherData && !loading && !error && (
-            <>
-              {forecastData && <Forecast forecastData={forecastData} />}
-              
-              <div className="dashboard-cta">
+            <WeatherCard 
+              weatherData={weatherData}
+              loading={loading}
+              error={error}
+            />
+          )}
+
+          {weatherData && !loading && !error && forecastData && (
+            <Forecast forecastData={forecastData} />
+          )}
+
+          {weatherData && !loading && !error && (
+            <div className="dashboard-cta">
+              <form onSubmit={handleContinueToDashboard}>
                 <button 
-                  onClick={handleContinueToDashboard}
+                  type="submit"
                   className="dashboard-btn"
                 >
                   🚀 Continue to Dashboard
                 </button>
-                <p className="cta-subtext">
-                  View detailed analytics and advanced weather insights
-                </p>
-              </div>
-            </>
+              </form>
+              <p className="cta-subtext">
+                View detailed analytics and advanced weather insights
+              </p>
+            </div>
           )}
         </div>
 

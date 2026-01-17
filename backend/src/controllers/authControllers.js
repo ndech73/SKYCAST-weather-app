@@ -51,45 +51,57 @@ const verifyPassword = async (password, hash) => {
 // In-memory store for failed attempts
 const failedAttempts = new Map();
 
-// Register controller - UPDATED FOR USERNAME
+// Clear failed attempts after 15 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of failedAttempts.entries()) {
+    if (now - value.timestamp > 15 * 60 * 1000) {
+      failedAttempts.delete(key);
+    }
+  }
+}, 5 * 60 * 1000); // Check every 5 minutes
+
+// Register controller
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
-  
-  // Input validation
-  if (!username || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Username, email, and password are required'
-    });
-  }
-
-  // Sanitize inputs
-  const sanitizedUsername = sanitizeInput(username);
-  const sanitizedEmail = sanitizeInput(email).toLowerCase();
-
-  // Validate inputs
-  if (!validateUsername(sanitizedUsername)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Username must be 3-30 characters and can only contain letters, numbers, and underscores'
-    });
-  }
-
-  if (!validateEmail(sanitizedEmail)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please provide a valid email address'
-    });
-  }
-
-  if (!validatePassword(password)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Password must be 8-100 characters with uppercase, lowercase, number, and special character'
-    });
-  }
-
   try {
+    const { username, email, password } = req.body;
+    
+    console.log('📝 Registration attempt:', { username, email: email?.substring(0, 3) + '***' });
+    
+    // Input validation
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username, email, and password are required'
+      });
+    }
+
+    // Sanitize inputs
+    const sanitizedUsername = sanitizeInput(username);
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+
+    // Validate inputs
+    if (!validateUsername(sanitizedUsername)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username must be 3-30 characters and can only contain letters, numbers, and underscores'
+      });
+    }
+
+    if (!validateEmail(sanitizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be 8-100 characters with uppercase, lowercase, number, and special character'
+      });
+    }
+
     // Check if username or email already exists
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -131,13 +143,15 @@ export const register = async (req, res) => {
       }
     });
 
+    console.log('✅ User registered successfully:', newUser.username);
+
     res.status(201).json({
       success: true,
       message: 'Registration successful! Please log in.',
       user: newUser
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('❌ Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Registration failed. Please try again.'
@@ -145,49 +159,59 @@ export const register = async (req, res) => {
   }
 };
 
-// Login controller - UPDATED FOR USERNAME
+// Login controller
 export const login = async (req, res) => {
-  const clientIP = req.ip || req.connection.remoteAddress;
-  
-  // Check for too many failed attempts
-  const attempts = failedAttempts.get(clientIP) || 0;
-  if (attempts >= 5) {
-    return res.status(429).json({
-      success: false,
-      message: 'Too many failed attempts. Please try again in 15 minutes.'
-    });
-  }
-
-  const { email, password } = req.body;
-  
-  // Input validation
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email and password are required'
-    });
-  }
-
-  // Sanitize inputs
-  const sanitizedEmail = sanitizeInput(email).toLowerCase();
-
-  // Validate inputs
-  if (!validateEmail(sanitizedEmail)) {
-    failedAttempts.set(clientIP, attempts + 1);
-    return res.status(400).json({
-      success: false,
-      message: 'Please provide a valid email address'
-    });
-  }
-
   try {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    
+    console.log('🔐 Login attempt from:', clientIP);
+    
+    // Check for too many failed attempts
+    const attemptData = failedAttempts.get(clientIP);
+    if (attemptData && attemptData.count >= 5) {
+      const timeSinceFirstAttempt = Date.now() - attemptData.timestamp;
+      if (timeSinceFirstAttempt < 15 * 60 * 1000) { // 15 minutes
+        return res.status(429).json({
+          success: false,
+          message: 'Too many failed attempts. Please try again in 15 minutes.'
+        });
+      } else {
+        // Reset after 15 minutes
+        failedAttempts.delete(clientIP);
+      }
+    }
+
+    const { email, password } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+
+    // Validate inputs
+    if (!validateEmail(sanitizedEmail)) {
+      const attempts = failedAttempts.get(clientIP) || { count: 0, timestamp: Date.now() };
+      failedAttempts.set(clientIP, { count: attempts.count + 1, timestamp: Date.now() });
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
     // Find user in database
     const user = await prisma.user.findUnique({
       where: { email: sanitizedEmail }
     });
 
     if (!user) {
-      failedAttempts.set(clientIP, attempts + 1);
+      const attempts = failedAttempts.get(clientIP) || { count: 0, timestamp: Date.now() };
+      failedAttempts.set(clientIP, { count: attempts.count + 1, timestamp: Date.now() });
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -198,7 +222,9 @@ export const login = async (req, res) => {
     const isPasswordValid = await verifyPassword(password, user.password);
     
     if (!isPasswordValid) {
-      failedAttempts.set(clientIP, attempts + 1);
+      const attempts = failedAttempts.get(clientIP) || { count: 0, timestamp: Date.now() };
+      failedAttempts.set(clientIP, { count: attempts.count + 1, timestamp: Date.now() });
+      console.log('❌ Invalid password for:', sanitizedEmail);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -208,7 +234,10 @@ export const login = async (req, res) => {
     // Reset failed attempts on successful login
     failedAttempts.delete(clientIP);
 
-    res.json({
+    console.log('✅ Login successful for:', user.username);
+
+    // SUCCESS RESPONSE
+    return res.status(200).json({
       success: true,
       message: 'Login successful',
       user: { 
@@ -219,8 +248,8 @@ export const login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
+    console.error('❌ Login error:', error);
+    return res.status(500).json({
       success: false,
       message: 'Login failed. Please try again.'
     });
@@ -229,18 +258,18 @@ export const login = async (req, res) => {
 
 // Forgot password controller
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email is required'
-    });
-  }
-
-  const sanitizedEmail = sanitizeInput(email).toLowerCase();
-
   try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email: sanitizedEmail }
@@ -267,7 +296,7 @@ export const forgotPassword = async (req, res) => {
     });
 
     // TODO: Send email with reset link
-    console.log(`Password reset token for ${sanitizedEmail}: ${resetToken}`);
+    console.log(`🔑 Password reset token for ${sanitizedEmail}: ${resetToken}`);
     
     res.json({
       success: true,
@@ -276,7 +305,7 @@ export const forgotPassword = async (req, res) => {
       resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
     });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error('❌ Forgot password error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to process password reset request'
@@ -286,23 +315,23 @@ export const forgotPassword = async (req, res) => {
 
 // Reset password controller
 export const resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-
-  if (!token || !newPassword) {
-    return res.status(400).json({
-      success: false,
-      message: 'Token and new password are required'
-    });
-  }
-
-  if (!validatePassword(newPassword)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Password must be 8-100 characters with uppercase, lowercase, number, and special character'
-    });
-  }
-
   try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and new password are required'
+      });
+    }
+
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be 8-100 characters with uppercase, lowercase, number, and special character'
+      });
+    }
+
     // Find valid reset token
     const resetToken = await prisma.resetToken.findFirst({
       where: {
@@ -335,12 +364,14 @@ export const resetPassword = async (req, res) => {
       })
     ]);
     
+    console.log('✅ Password reset successfully for user:', resetToken.userId);
+    
     res.json({
       success: true,
       message: 'Password reset successfully. You can now log in with your new password.'
     });
   } catch (error) {
-    console.error('Reset password error:', error);
+    console.error('❌ Reset password error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to reset password'
@@ -350,9 +381,9 @@ export const resetPassword = async (req, res) => {
 
 // Verify reset token controller
 export const verifyResetToken = async (req, res) => {
-  const { token } = req.params;
-
   try {
+    const { token } = req.params;
+
     const resetToken = await prisma.resetToken.findFirst({
       where: {
         token: token,
@@ -373,7 +404,7 @@ export const verifyResetToken = async (req, res) => {
       message: 'Token is valid'
     });
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('❌ Token verification error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to verify token'
