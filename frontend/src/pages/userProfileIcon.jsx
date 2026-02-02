@@ -1,75 +1,86 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/pages/userProfileIcon.css';
 
+const DEFAULT_PROFILE = {
+  name: '',
+  email: '',
+  location: '',
+  avatar: '👤',
+  avatarImage: null
+};
+
+const safeParseProfile = (value) => {
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return { ...DEFAULT_PROFILE, ...parsed };
+  } catch {
+    return null;
+  }
+};
+
+const loadProfileFromStorage = () => {
+  const raw = localStorage.getItem('userProfile');
+  if (!raw) return DEFAULT_PROFILE;
+  return safeParseProfile(raw) || DEFAULT_PROFILE;
+};
+
 const UserProfileIcon = () => {
-  const [userProfile, setUserProfile] = useState({
-    name: '',
-    email: '',
-    location: '',
-    avatar: '👤',
-    avatarImage: null
-  });
+  // Initialize from localStorage ONCE (prevents render loops)
+  const [userProfile, setUserProfile] = useState(loadProfileFromStorage);
   const [showDropdown, setShowDropdown] = useState(false);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Load user profile from localStorage on mount
-    loadUserProfile();
+  // Used to avoid unnecessary state updates (and to remove polling)
+  const currentProfileString = useMemo(() => JSON.stringify(userProfile), [userProfile]);
 
+  useEffect(() => {
     // Listen for profile updates from Settings page
     const handleProfileUpdate = (event) => {
-      console.log('Profile updated event received:', event.detail);
-      setUserProfile(event.detail);
-    };
+      const next = event?.detail ? { ...DEFAULT_PROFILE, ...event.detail } : null;
+      if (!next) return;
 
-    // Listen for storage changes (when saved in Settings)
-    const handleStorageChange = (event) => {
-      if (event.key === 'userProfile' || event.storageArea === localStorage) {
-        console.log('Storage changed, reloading profile');
-        loadUserProfile();
+      const nextString = JSON.stringify(next);
+      if (nextString !== currentProfileString) {
+        setUserProfile(next);
       }
     };
 
-    // Add event listeners
+    // Listen for storage changes (only fires for OTHER tabs/windows)
+    const handleStorageChange = (event) => {
+      if (event.key !== 'userProfile') return;
+
+      const next = event.newValue ? safeParseProfile(event.newValue) : DEFAULT_PROFILE;
+      if (!next) return;
+
+      const nextString = JSON.stringify(next);
+      if (nextString !== currentProfileString) {
+        setUserProfile(next);
+      }
+    };
+
+    // Listen for logout broadcast (optional, matches your other components)
+    const handleLoggedOut = () => {
+      setUserProfile(DEFAULT_PROFILE);
+      setShowDropdown(false);
+    };
+
     window.addEventListener('userProfileUpdated', handleProfileUpdate);
     window.addEventListener('storage', handleStorageChange);
-
-    // Poll localStorage every 500ms to catch changes (fallback mechanism)
-    const pollInterval = setInterval(() => {
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        const parsed = JSON.parse(savedProfile);
-        // Only update if there's an actual change
-        if (JSON.stringify(parsed) !== JSON.stringify(userProfile)) {
-          console.log('Profile changed detected via polling');
-          setUserProfile(parsed);
-        }
-      }
-    }, 500);
+    window.addEventListener('userLoggedOut', handleLoggedOut);
 
     return () => {
       window.removeEventListener('userProfileUpdated', handleProfileUpdate);
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(pollInterval);
+      window.removeEventListener('userLoggedOut', handleLoggedOut);
     };
-  }, [userProfile]); // Include userProfile in dependency array
-
-  const loadUserProfile = () => {
-    try {
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        const parsed = JSON.parse(savedProfile);
-        console.log('Loaded profile from localStorage:', parsed);
-        setUserProfile(parsed);
-      }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-    }
-  };
+    // IMPORTANT: do NOT depend on userProfile directly (avoids maximum update depth)
+  }, [currentProfileString]);
 
   const handleIconClick = () => {
-    setShowDropdown(!showDropdown);
+    setShowDropdown((v) => !v);
   };
 
   const handleSettingsClick = () => {
@@ -81,14 +92,10 @@ const UserProfileIcon = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       localStorage.removeItem('userProfile');
       localStorage.removeItem('weatherAppSettings');
-      setUserProfile({
-        name: '',
-        email: '',
-        location: '',
-        avatar: '👤',
-        avatarImage: null
-      });
+
+      setUserProfile(DEFAULT_PROFILE);
       setShowDropdown(false);
+
       // Trigger a custom event to notify other components
       window.dispatchEvent(new CustomEvent('userLoggedOut'));
     }
@@ -110,15 +117,15 @@ const UserProfileIcon = () => {
 
   return (
     <div className="user-profile-icon-container">
-      <button 
+      <button
         className="user-profile-icon-button"
         onClick={handleIconClick}
         title={userProfile.name || 'User Profile'}
       >
         {userProfile.avatarImage ? (
-          <img 
-            src={userProfile.avatarImage} 
-            alt="Profile" 
+          <img
+            src={userProfile.avatarImage}
+            alt="Profile"
             className="user-profile-image"
           />
         ) : (
@@ -131,9 +138,9 @@ const UserProfileIcon = () => {
           <div className="dropdown-header">
             <div className="dropdown-avatar">
               {userProfile.avatarImage ? (
-                <img 
-                  src={userProfile.avatarImage} 
-                  alt="Profile" 
+                <img
+                  src={userProfile.avatarImage}
+                  alt="Profile"
                   className="dropdown-avatar-image"
                 />
               ) : (
@@ -152,15 +159,12 @@ const UserProfileIcon = () => {
           <div className="dropdown-divider"></div>
 
           <div className="dropdown-menu">
-            <button 
-              className="dropdown-item"
-              onClick={handleSettingsClick}
-            >
+            <button className="dropdown-item" onClick={handleSettingsClick}>
               <span className="dropdown-icon">⚙️</span>
               <span>Settings</span>
             </button>
 
-            <button 
+            <button
               className="dropdown-item"
               onClick={() => {
                 setShowDropdown(false);
@@ -171,7 +175,7 @@ const UserProfileIcon = () => {
               <span>Weather History</span>
             </button>
 
-            <button 
+            <button
               className="dropdown-item"
               onClick={() => {
                 setShowDropdown(false);
@@ -185,10 +189,7 @@ const UserProfileIcon = () => {
 
           <div className="dropdown-divider"></div>
 
-          <button 
-            className="dropdown-item logout"
-            onClick={handleLogout}
-          >
+          <button className="dropdown-item logout" onClick={handleLogout}>
             <span className="dropdown-icon">🚪</span>
             <span>Logout</span>
           </button>

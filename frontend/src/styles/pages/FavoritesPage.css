@@ -418,4 +418,68 @@
   .quick-action-btn {
     width: 100%;
   }
+}  
+
+/* =============================================
+   FAVORITE CARD ACTIONS - PREVENT OVERLAP
+   ============================================= */
+
+.favorite-actions {
+  display: flex !important;
+  gap: 0.5rem !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+}
+
+.favorite-actions button,
+.favorite-actions .action-btn {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 8px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Dark mode fixes */
+html[data-theme="dark"] .favorite-actions .action-btn,
+html[data-theme="dark"] .favorite-actions button,
+html.dark .favorite-actions .action-btn,
+html.dark .favorite-actions button {
+  background: #16213e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .favorite-actions .view-btn,
+html.dark .favorite-actions .view-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .favorite-actions .compare-btn,
+html.dark .favorite-actions .compare-btn {
+  background: #16213e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .favorite-actions button:hover,
+html.dark .favorite-actions button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Responsive - stack buttons on small screens */
+@media (max-width: 400px) {
+  .favorite-actions {
+    flex-direction: column !important;
+  }
+  
+  .favorite-actions button {
+    width: 100% !important;
+  }
 }

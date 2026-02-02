@@ -1,9 +1,13 @@
 // components/WeatherCard.jsx
 import React from 'react';
+import { useSettings } from '../context/settingsContext';
 import LoadingSpinner from './loadingSpinner';
 import '../styles/pages/weatherCard.css';
 
 const WeatherCard = ({ weatherData, loading, error }) => {
+  // Get conversion utilities from settings context
+  const { convertTemperature, getTempUnit, convertSpeed, getSpeedUnit } = useSettings();
+
   if (loading) {
     return <LoadingSpinner message="Fetching weather data..." />;
   }
@@ -61,7 +65,7 @@ const WeatherCard = ({ weatherData, loading, error }) => {
         />
         <div className="temperature-section">
           <p className="temperature">
-            {typeof temp === 'number' ? Math.round(temp) : '--'}°C
+            {convertTemperature(temp, 'celsius')}{getTempUnit()}
           </p>
           <p className="description">{safeDescription}</p>
         </div>
@@ -71,7 +75,7 @@ const WeatherCard = ({ weatherData, loading, error }) => {
         <div className="detail-item">
           <span className="label">Feels like:</span>
           <span className="value">
-            {typeof feels_like === 'number' ? Math.round(feels_like) : '--'}°C
+            {convertTemperature(feels_like, 'celsius')}{getTempUnit()}
           </span>
         </div>
         <div className="detail-item">
@@ -89,7 +93,7 @@ const WeatherCard = ({ weatherData, loading, error }) => {
         <div className="detail-item">
           <span className="label">Wind Speed:</span>
           <span className="value">
-            {typeof wind?.speed === 'number' ? wind.speed.toFixed(1) : '--'} m/s
+            {convertSpeed(wind?.speed, 'ms')} {getSpeedUnit()}
           </span>
         </div>
       </div>

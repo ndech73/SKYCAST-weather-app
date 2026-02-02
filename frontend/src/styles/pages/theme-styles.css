@@ -1,0 +1,2191 @@
+/* =============================================
+   SKYCAST GLOBAL THEME SYSTEM
+   ============================================= */
+
+/* =============================================
+   LIGHT THEME (DEFAULT)
+   ============================================= */
+:root,
+:root[data-theme="light"],
+html.light {
+  /* Backgrounds */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* Text colors */
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --text-muted: #a0aec0;
+  --text-inverse: #ffffff;
+  
+  /* Card and surface colors */
+  --card-bg: #ffffff;
+  --card-bg-hover: #f7fafc;
+  --card-border: #e2e8f0;
+  
+  /* Input colors */
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-focus-border: #667eea;
+  --input-placeholder: #a0aec0;
+  
+  /* Button colors */
+  --btn-primary-bg: #667eea;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #e2e8f0;
+  --btn-secondary-text: #2d3748;
+  
+  /* Accent colors */
+  --accent-primary: #667eea;
+  --accent-secondary: #764ba2;
+  --accent-success: #48bb78;
+  --accent-warning: #ed8936;
+  --accent-danger: #f56565;
+  --accent-info: #4299e1;
+  
+  /* Border colors */
+  --border-color: #e2e8f0;
+  --border-light: #edf2f7;
+  
+  /* Shadow colors */
+  --shadow-sm: rgba(0, 0, 0, 0.05);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+  
+  /* Dashboard specific */
+  --dashboard-bg: #f8f9fa;
+  --content-header-bg: #ffffff;
+  --sidebar-bg: #1a1a2e;
+  --sidebar-text: #ffffff;
+}
+
+/* =============================================
+   DARK THEME
+   ============================================= */
+:root[data-theme="dark"],
+html.dark,
+html[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary: #0f0f1a !important;
+  --bg-secondary: #1a1a2e !important;
+  --bg-tertiary: #16213e !important;
+  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+  
+  /* Text colors */
+  --text-primary: #e2e8f0 !important;
+  --text-secondary: #a0aec0 !important;
+  --text-muted: #718096 !important;
+  --text-inverse: #1a1a2e !important;
+  
+  /* Card and surface colors */
+  --card-bg: #1a1a2e !important;
+  --card-bg-hover: #16213e !important;
+  --card-border: #2d3748 !important;
+  
+  /* Input colors */
+  --input-bg: #16213e !important;
+  --input-border: #2d3748 !important;
+  --input-focus-border: #667eea !important;
+  --input-placeholder: #718096 !important;
+  
+  /* Button colors */
+  --btn-primary-bg: #667eea !important;
+  --btn-primary-text: #ffffff !important;
+  --btn-secondary-bg: #2d3748 !important;
+  --btn-secondary-text: #e2e8f0 !important;
+  
+  /* Border colors */
+  --border-color: #2d3748 !important;
+  --border-light: #4a5568 !important;
+  
+  /* Shadow colors */
+  --shadow-sm: rgba(0, 0, 0, 0.3) !important;
+  --shadow-md: rgba(0, 0, 0, 0.4) !important;
+  --shadow-lg: rgba(0, 0, 0, 0.5) !important;
+  
+  /* Dashboard specific */
+  --dashboard-bg: #0f0f1a !important;
+  --content-header-bg: #1a1a2e !important;
+  --sidebar-bg: #0a0a14 !important;
+  --sidebar-text: #e2e8f0 !important;
+}
+
+/* =============================================
+   GLOBAL ELEMENT OVERRIDES FOR DARK MODE
+   ============================================= */
+
+/* Body and HTML */
+html[data-theme="dark"] body,
+html.dark body {
+  background-color: #0f0f1a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Root div */
+html[data-theme="dark"] #root,
+html.dark #root {
+  background-color: #0f0f1a !important;
+  min-height: 100vh;
+}
+
+/* App container */
+html[data-theme="dark"] .App,
+html.dark .App {
+  background-color: #0f0f1a !important;
+}
+
+/* =============================================
+   DASHBOARD DARK MODE OVERRIDES
+   ============================================= */
+
+/* Dashboard container */
+html[data-theme="dark"] .dashboard-container,
+html.dark .dashboard-container {
+  background-color: #0f0f1a !important;
+}
+
+/* Dashboard content area */
+html[data-theme="dark"] .dashboard-content,
+html.dark .dashboard-content {
+  background-color: #0f0f1a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Content header */
+html[data-theme="dark"] .content-header,
+html.dark .content-header {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .content-header h1,
+html.dark .content-header h1 {
+  color: #ffffff !important;
+}
+
+/* =============================================
+   SETTINGS PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .settings-page,
+html.dark .settings-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .settings-header h2,
+html.dark .settings-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .settings-header p,
+html.dark .settings-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .settings-section,
+html.dark .settings-section {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .settings-section h3,
+html.dark .settings-section h3 {
+  color: #ffffff !important;
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .settings-section h4,
+html[data-theme="dark"] .settings-section label,
+html.dark .settings-section h4,
+html.dark .settings-section label {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .settings-section p,
+html.dark .settings-section p {
+  color: #a0aec0 !important;
+}
+
+/* Profile card */
+html[data-theme="dark"] .profile-card,
+html.dark .profile-card {
+  background-color: #16213e !important;
+}
+
+/* Form inputs */
+html[data-theme="dark"] .settings-page input[type="text"],
+html[data-theme="dark"] .settings-page input[type="email"],
+html[data-theme="dark"] .settings-page input[type="password"],
+html[data-theme="dark"] .settings-page textarea,
+html[data-theme="dark"] .settings-page select,
+html.dark .settings-page input[type="text"],
+html.dark .settings-page input[type="email"],
+html.dark .settings-page input[type="password"],
+html.dark .settings-page textarea,
+html.dark .settings-page select {
+  background-color: #16213e !important;
+  color: #e2e8f0 !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .settings-page input::placeholder,
+html.dark .settings-page input::placeholder {
+  color: #718096 !important;
+}
+
+/* Radio and checkbox labels */
+html[data-theme="dark"] .radio-text,
+html[data-theme="dark"] .radio-label,
+html.dark .radio-text,
+html.dark .radio-label {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .toggle-text,
+html.dark .toggle-text {
+  color: #a0aec0 !important;
+}
+
+/* Theme selector */
+html[data-theme="dark"] .theme-option,
+html.dark .theme-option {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .theme-option h4,
+html.dark .theme-option h4 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .theme-option p,
+html.dark .theme-option p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .theme-option.selected,
+html.dark .theme-option.selected {
+  border-color: #667eea !important;
+  background-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Language selector */
+html[data-theme="dark"] .language-select,
+html[data-theme="dark"] .interval-select,
+html.dark .language-select,
+html.dark .interval-select {
+  background-color: #16213e !important;
+  color: #e2e8f0 !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .language-note,
+html.dark .language-note {
+  color: #718096 !important;
+}
+
+/* Notification card */
+html[data-theme="dark"] .notification-card,
+html.dark .notification-card {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .notification-help,
+html.dark .notification-help {
+  background-color: rgba(102, 126, 234, 0.1) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+html[data-theme="dark"] .notification-help p,
+html.dark .notification-help p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .notification-divider,
+html.dark .notification-divider {
+  background-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .control-info h4,
+html[data-theme="dark"] .toggle-info h4,
+html.dark .control-info h4,
+html.dark .toggle-info h4 {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .control-info p,
+html[data-theme="dark"] .toggle-info p,
+html.dark .control-info p,
+html.dark .toggle-info p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .alert-info p,
+html.dark .alert-info p {
+  color: #a0aec0 !important;
+}
+
+/* Advanced settings */
+html[data-theme="dark"] .advanced-settings,
+html.dark .advanced-settings {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .advanced-settings h3,
+html.dark .advanced-settings h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .advanced-item,
+html.dark .advanced-item {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .advanced-item h4,
+html.dark .advanced-item h4 {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .advanced-item p,
+html.dark .advanced-item p {
+  color: #a0aec0 !important;
+}
+
+/* App info */
+html[data-theme="dark"] .app-info,
+html.dark .app-info {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .app-info h3,
+html.dark .app-info h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .info-label,
+html.dark .info-label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .info-value,
+html.dark .info-value {
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   OVERVIEW PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .overview-page,
+html.dark .overview-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .weather-metrics,
+html.dark .weather-metrics {
+  background-color: transparent !important;
+}
+
+html[data-theme="dark"] .metric-card,
+html.dark .metric-card {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .metric-card:hover,
+html.dark .metric-card:hover {
+  background-color: #16213e !important;
+}
+
+html[data-theme="dark"] .metric-value,
+html.dark .metric-value {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .metric-label,
+html.dark .metric-label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .feature-card,
+html.dark .feature-card {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .feature-card:hover,
+html.dark .feature-card:hover {
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .feature-card h3,
+html.dark .feature-card h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .feature-card p,
+html.dark .feature-card p {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   HISTORY PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .history-page,
+html.dark .history-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .history-header h2,
+html.dark .history-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .history-header p,
+html.dark .history-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .history-controls,
+html.dark .history-controls {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+/* =============================================
+   OUTFITS PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .outfits-page,
+html.dark .outfits-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .outfits-header h2,
+html.dark .outfits-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfits-header p,
+html.dark .outfits-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .preferences-panel,
+html[data-theme="dark"] .recommendations-section,
+html.dark .preferences-panel,
+html.dark .recommendations-section {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .preferences-panel h3,
+html[data-theme="dark"] .recommendations-section h3,
+html.dark .preferences-panel h3,
+html.dark .recommendations-section h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfit-card,
+html.dark .outfit-card {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .pref-btn,
+html.dark .pref-btn {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .pref-btn:hover,
+html[data-theme="dark"] .pref-btn.active,
+html.dark .pref-btn:hover,
+html.dark .pref-btn.active {
+  background-color: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+/* =============================================
+   FAVORITES PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .favorites-page,
+html.dark .favorites-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .favorites-header h2,
+html.dark .favorites-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .favorites-header p,
+html.dark .favorites-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .favorite-card,
+html.dark .favorite-card {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .add-favorite-form,
+html.dark .add-favorite-form {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+/* =============================================
+   RADAR PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .radar-page,
+html.dark .radar-page {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   WEATHER CARD DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .weather-card,
+html.dark .weather-card {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .weather-card h2,
+html[data-theme="dark"] .weather-card .city-name,
+html.dark .weather-card h2,
+html.dark .weather-card .city-name {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .weather-card .temperature,
+html.dark .weather-card .temperature {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .weather-card .description,
+html.dark .weather-card .description {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .weather-details,
+html.dark .weather-details {
+  background-color: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .weather-details .label,
+html.dark .weather-details .label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .weather-details .value,
+html.dark .weather-details .value {
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   FORECAST DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .forecast-container,
+html.dark .forecast-container {
+  background-color: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .forecast-container h3,
+html.dark .forecast-container h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .forecast-day,
+html.dark .forecast-day {
+  background-color: #16213e !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .forecast-day:hover,
+html.dark .forecast-day:hover {
+  background-color: #667eea !important;
+}
+
+html[data-theme="dark"] .day-name,
+html.dark .day-name {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .temp-high,
+html.dark .temp-high {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .temp-low,
+html.dark .temp-low {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .forecast-desc,
+html.dark .forecast-desc {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   HOME PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .home-container,
+html.dark .home-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+}
+
+html[data-theme="dark"] .welcome-state,
+html.dark .welcome-state {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .welcome-state h2,
+html.dark .welcome-state h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .welcome-state p,
+html.dark .welcome-state p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .feature-card,
+html.dark .feature-card {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* =============================================
+   GENERAL ELEMENTS DARK MODE
+   ============================================= */
+
+/* All headings */
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #e2e8f0;
+}
+
+/* All paragraphs */
+html[data-theme="dark"] p,
+html.dark p {
+  color: #a0aec0;
+}
+
+/* All labels */
+html[data-theme="dark"] label,
+html.dark label {
+  color: #e2e8f0;
+}
+
+/* All inputs */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #16213e;
+  color: #e2e8f0;
+  border-color: #2d3748;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder,
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #718096;
+}
+
+/* Scrollbar */
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #4a5568;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+/* =============================================
+   SMOOTH TRANSITIONS
+   ============================================= */
+
+* {
+  transition: background-color 0.3s ease, 
+              border-color 0.3s ease, 
+              color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Disable transitions on page load */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
+/* =============================================
+   COMPREHENSIVE DARK MODE FIXES FOR ALL PAGES
+   ============================================= */
+
+/* =============================================
+   HISTORY PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .history-page,
+html.dark .history-page {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .history-header h2,
+html.dark .history-header h2 {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #667eea 0%, #a78bfa 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+html[data-theme="dark"] .history-header p,
+html.dark .history-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .history-controls,
+html.dark .history-controls {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .history-controls label,
+html.dark .history-controls label {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .time-btn,
+html[data-theme="dark"] .metric-btn,
+html[data-theme="dark"] .chart-type-btn,
+html.dark .time-btn,
+html.dark .metric-btn,
+html.dark .chart-type-btn {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .time-btn:hover,
+html[data-theme="dark"] .metric-btn:hover,
+html[data-theme="dark"] .chart-type-btn:hover,
+html.dark .time-btn:hover,
+html.dark .metric-btn:hover,
+html.dark .chart-type-btn:hover {
+  border-color: #667eea !important;
+  color: #667eea !important;
+  background: #1e3a5f !important;
+}
+
+html[data-theme="dark"] .time-btn.active,
+html[data-theme="dark"] .chart-type-btn.active,
+html[data-theme="dark"] .metric-btn.active,
+html.dark .time-btn.active,
+html.dark .chart-type-btn.active,
+html.dark .metric-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .city-select,
+html.dark .city-select {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .chart-container,
+html[data-theme="dark"] .analytics-card,
+html.dark .chart-container,
+html.dark .analytics-card {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .chart-header h3,
+html[data-theme="dark"] .analytics-card h3,
+html.dark .chart-header h3,
+html.dark .analytics-card h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .current-value,
+html.dark .current-value {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+html[data-theme="dark"] .current-value .value,
+html.dark .current-value .value {
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .current-value .unit,
+html.dark .current-value .unit {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .chart-info,
+html.dark .chart-info {
+  border-top-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .info-box,
+html.dark .info-box {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .info-box:hover,
+html.dark .info-box:hover {
+  background: #1e3a5f !important;
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .info-label,
+html.dark .info-label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .info-value,
+html.dark .info-value {
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .loading-container p,
+html.dark .loading-container p {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   FAVORITES PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .favorites-page,
+html.dark .favorites-page {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .favorites-header,
+html.dark .favorites-header {
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .favorites-header h2,
+html.dark .favorites-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .favorites-header p,
+html.dark .favorites-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .add-favorite-section,
+html[data-theme="dark"] .comparison-section,
+html[data-theme="dark"] .quick-actions,
+html.dark .add-favorite-section,
+html.dark .comparison-section,
+html.dark .quick-actions {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .add-favorite-section h3,
+html[data-theme="dark"] .comparison-section h3,
+html[data-theme="dark"] .quick-actions h3,
+html.dark .add-favorite-section h3,
+html.dark .comparison-section h3,
+html.dark .quick-actions h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .city-input,
+html.dark .city-input {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .city-input::placeholder,
+html.dark .city-input::placeholder {
+  color: #718096 !important;
+}
+
+html[data-theme="dark"] .form-hint,
+html.dark .form-hint {
+  color: #718096 !important;
+}
+
+html[data-theme="dark"] .favorite-card,
+html.dark .favorite-card {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .favorite-card:hover,
+html.dark .favorite-card:hover {
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .location-info h3,
+html.dark .location-info h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .country,
+html[data-theme="dark"] .condition,
+html.dark .country,
+html.dark .condition {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .temp-value,
+html.dark .temp-value {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .detail-value,
+html.dark .detail-value {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .empty-favorites,
+html.dark .empty-favorites {
+  background: #16213e !important;
+}
+
+html[data-theme="dark"] .empty-favorites h4,
+html.dark .empty-favorites h4 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .empty-favorites p,
+html.dark .empty-favorites p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .comparison-table th,
+html.dark .comparison-table th {
+  background: #16213e !important;
+  color: #e2e8f0 !important;
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .comparison-table td,
+html.dark .comparison-table td {
+  border-bottom-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .comparison-table tr:hover,
+html.dark .comparison-table tr:hover {
+  background: #16213e !important;
+}
+
+html[data-theme="dark"] .temp-cell,
+html.dark .temp-cell {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .condition-badge,
+html.dark .condition-badge {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .favorites-stats .stat-card,
+html.dark .favorites-stats .stat-card {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .favorites-stats .stat-value,
+html.dark .favorites-stats .stat-value {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .favorites-stats .stat-label,
+html.dark .favorites-stats .stat-label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .quick-action-btn,
+html.dark .quick-action-btn {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .quick-action-btn:hover,
+html.dark .quick-action-btn:hover {
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .compare-btn,
+html.dark .compare-btn {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   OUTFITS PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .outfits-page,
+html.dark .outfits-page {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .outfits-header,
+html.dark .outfits-header {
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .outfits-header h2,
+html.dark .outfits-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfits-header p,
+html.dark .outfits-header p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .preferences-panel,
+html[data-theme="dark"] .recommendations-section,
+html.dark .preferences-panel,
+html.dark .recommendations-section {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .preferences-panel h3,
+html[data-theme="dark"] .recommendations-section h3,
+html.dark .preferences-panel h3,
+html.dark .recommendations-section h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .preference-group label,
+html.dark .preference-group label {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .pref-btn,
+html.dark .pref-btn {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .pref-btn:hover,
+html.dark .pref-btn:hover {
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .pref-btn.active,
+html.dark .pref-btn.active {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfit-card,
+html.dark .outfit-card {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .outfit-card:hover,
+html.dark .outfit-card:hover {
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .outfit-header h4,
+html.dark .outfit-header h4 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfit-description,
+html.dark .outfit-description {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .outfit-items h5,
+html.dark .outfit-items h5 {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .outfit-items ul,
+html.dark .outfit-items ul {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .share-outfit-btn,
+html.dark .share-outfit-btn {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .no-recommendations,
+html.dark .no-recommendations {
+  background: #16213e !important;
+}
+
+html[data-theme="dark"] .no-recommendations h4,
+html.dark .no-recommendations h4 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .no-recommendations p,
+html.dark .no-recommendations p {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .outfit-stats .stat-card,
+html.dark .outfit-stats .stat-card {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .outfit-stats .stat-value,
+html.dark .outfit-stats .stat-value {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .outfit-stats .stat-label,
+html.dark .outfit-stats .stat-label {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   RADAR PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .radar-page,
+html.dark .radar-page {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .radar-sidebar-minimal,
+html.dark .radar-sidebar-minimal {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .section-title,
+html.dark .section-title {
+  color: #ffffff !important;
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .weather-search-bar input,
+html.dark .weather-search-bar input {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .weather-search-bar input::placeholder,
+html.dark .weather-search-bar input::placeholder {
+  color: #718096 !important;
+}
+
+html[data-theme="dark"] .weather-search-bar input:focus,
+html.dark .weather-search-bar input:focus {
+  background: #1e3a5f !important;
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .map-style-btn,
+html[data-theme="dark"] .layer-toggle-btn,
+html.dark .map-style-btn,
+html.dark .layer-toggle-btn {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .map-style-btn:hover,
+html[data-theme="dark"] .layer-toggle-btn:hover,
+html.dark .map-style-btn:hover,
+html.dark .layer-toggle-btn:hover {
+  border-color: #667eea !important;
+  color: #667eea !important;
+  background: #1e3a5f !important;
+}
+
+html[data-theme="dark"] .sidebar-legend,
+html.dark .sidebar-legend {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .sidebar-legend-title,
+html.dark .sidebar-legend-title {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .sidebar-legend-unit,
+html.dark .sidebar-legend-unit {
+  color: #a0aec0 !important;
+  border-bottom-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .sidebar-legend-value,
+html.dark .sidebar-legend-value {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .sidebar-legend-desc,
+html.dark .sidebar-legend-desc {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .map-legend-overlay,
+html[data-theme="dark"] .active-layer-badge,
+html[data-theme="dark"] .map-style-badge,
+html.dark .map-legend-overlay,
+html.dark .active-layer-badge,
+html.dark .map-style-badge {
+  background: rgba(26, 26, 46, 0.95) !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .map-legend-header,
+html.dark .map-legend-header {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .map-legend-labels,
+html.dark .map-legend-labels {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .active-layer-badge,
+html.dark .active-layer-badge {
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .map-style-badge,
+html.dark .map-style-badge {
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   HOME PAGE DARK MODE
+   ============================================= */
+
+html[data-theme="dark"] .home-container,
+html.dark .home-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+}
+
+html[data-theme="dark"] .home-header,
+html.dark .home-header {
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.98) 0%, 
+    rgba(22, 33, 62, 0.98) 100%) !important;
+}
+
+html[data-theme="dark"] .weather-card,
+html.dark .weather-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .weather-card::before,
+html.dark .weather-card::before {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+html[data-theme="dark"] .weather-city,
+html.dark .weather-city {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .location-info,
+html.dark .location-info {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .weather-condition,
+html.dark .weather-condition {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .weather-details,
+html.dark .weather-details {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .forecast-section,
+html.dark .forecast-section {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .forecast-header h2,
+html.dark .forecast-header h2 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .forecast-placeholder,
+html.dark .forecast-placeholder {
+  background: #16213e !important;
+  border-color: #2d3748 !important;
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   GLOBAL CATCH-ALL FOR ANY REMAINING WHITE ELEMENTS
+   ============================================= */
+
+/* Force dark backgrounds on common white classes */
+html[data-theme="dark"] [class*="bg-white"],
+html[data-theme="dark"] [class*="white-bg"],
+html[data-theme="dark"] [class*="background-white"],
+html.dark [class*="bg-white"],
+html.dark [class*="white-bg"],
+html.dark [class*="background-white"] {
+  background-color: #1a1a2e !important;
+}
+
+/* Force dark on light gray backgrounds */
+html[data-theme="dark"] [class*="bg-light"],
+html[data-theme="dark"] [class*="light-bg"],
+html[data-theme="dark"] [class*="background-light"],
+html.dark [class*="bg-light"],
+html.dark [class*="light-bg"],
+html.dark [class*="background-light"] {
+  background-color: #16213e !important;
+}
+
+/* Force text colors */
+html[data-theme="dark"] [class*="text-dark"],
+html.dark [class*="text-dark"] {
+  color: #e2e8f0 !important;
+}
+
+/* Fix any remaining border colors */
+html[data-theme="dark"] [style*="border-color: #e0e0e0"],
+html[data-theme="dark"] [style*="border: 1px solid #e0e0e0"],
+html.dark [style*="border-color: #e0e0e0"],
+html.dark [style*="border: 1px solid #e0e0e0"] {
+  border-color: #2d3748 !important;
+}
+
+/* =============================================
+   WEATHER OVERVIEW PAGE - FINAL FIXES
+   ============================================= */
+
+/* Notification Banner at top of page */
+html[data-theme="dark"] .notification-banner,
+html[data-theme="dark"] .alert-banner,
+html[data-theme="dark"] .weather-alert,
+html[data-theme="dark"] .notification-bar,
+html[data-theme="dark"] [class*="notification"],
+html[data-theme="dark"] [class*="alert-bar"],
+html.dark .notification-banner,
+html.dark .alert-banner,
+html.dark .weather-alert,
+html.dark .notification-bar,
+html.dark [class*="notification"],
+html.dark [class*="alert-bar"] {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* The oval notification element at top right */
+html[data-theme="dark"] .header-notification,
+html[data-theme="dark"] .notification-container,
+html[data-theme="dark"] .notifications-wrapper,
+html[data-theme="dark"] .notification-pill,
+html.dark .header-notification,
+html.dark .notification-container,
+html.dark .notifications-wrapper,
+html.dark .notification-pill {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+/* Notification icon button */
+html[data-theme="dark"] .notification-btn,
+html[data-theme="dark"] .notification-icon,
+html[data-theme="dark"] .bell-icon,
+html[data-theme="dark"] [class*="notif-btn"],
+html[data-theme="dark"] [class*="notification-trigger"],
+html.dark .notification-btn,
+html.dark .notification-icon,
+html.dark .bell-icon,
+html.dark [class*="notif-btn"],
+html.dark [class*="notification-trigger"] {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Action buttons in header (notification, settings, profile icons) */
+html[data-theme="dark"] .content-header .action-btn,
+html[data-theme="dark"] .header-actions .action-btn,
+html[data-theme="dark"] .header-actions button,
+html.dark .content-header .action-btn,
+html.dark .header-actions .action-btn,
+html.dark .header-actions button {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .content-header .action-btn:hover,
+html[data-theme="dark"] .header-actions .action-btn:hover,
+html.dark .content-header .action-btn:hover,
+html.dark .header-actions .action-btn:hover {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+/* =============================================
+   24-HOUR FORECAST SECTION - COMPLETE FIX
+   ============================================= */
+
+/* Main forecast section container */
+html[data-theme="dark"] .hourly-forecast-section,
+html[data-theme="dark"] .forecast-section,
+html[data-theme="dark"] .hourly-section,
+html[data-theme="dark"] .twenty-four-hour-forecast,
+html[data-theme="dark"] [class*="hourly-forecast"],
+html[data-theme="dark"] [class*="24-hour"],
+html.dark .hourly-forecast-section,
+html.dark .forecast-section,
+html.dark .hourly-section,
+html.dark .twenty-four-hour-forecast,
+html.dark [class*="hourly-forecast"],
+html.dark [class*="24-hour"] {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Forecast section header */
+html[data-theme="dark"] .hourly-forecast-section h3,
+html[data-theme="dark"] .forecast-section h3,
+html[data-theme="dark"] .section-header h3,
+html[data-theme="dark"] [class*="hourly-forecast"] h3,
+html.dark .hourly-forecast-section h3,
+html.dark .forecast-section h3,
+html.dark .section-header h3,
+html.dark [class*="hourly-forecast"] h3 {
+  color: #ffffff !important;
+}
+
+/* Section header border */
+html[data-theme="dark"] .section-header,
+html.dark .section-header {
+  border-bottom-color: #2d3748 !important;
+}
+
+/* Location text in forecast */
+html[data-theme="dark"] .forecast-location,
+html[data-theme="dark"] .location-label,
+html[data-theme="dark"] [class*="location-text"],
+html.dark .forecast-location,
+html.dark .location-label,
+html.dark [class*="location-text"] {
+  color: #a0aec0 !important;
+}
+
+/* Timeline container */
+html[data-theme="dark"] .hourly-timeline,
+html[data-theme="dark"] .timeline-container,
+html.dark .hourly-timeline,
+html.dark .timeline-container {
+  background: transparent !important;
+}
+
+/* Individual hour cards in the timeline */
+html[data-theme="dark"] .timeline-hour,
+html[data-theme="dark"] .hour-card,
+html[data-theme="dark"] .hourly-item,
+html[data-theme="dark"] .forecast-hour,
+html[data-theme="dark"] [class*="hour-card"],
+html[data-theme="dark"] [class*="timeline-hour"],
+html.dark .timeline-hour,
+html.dark .hour-card,
+html.dark .hourly-item,
+html.dark .forecast-hour,
+html.dark [class*="hour-card"],
+html.dark [class*="timeline-hour"] {
+  background: #16213e !important;
+  border: 1px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .timeline-hour:hover,
+html[data-theme="dark"] .hour-card:hover,
+html[data-theme="dark"] .hourly-item:hover,
+html.dark .timeline-hour:hover,
+html.dark .hour-card:hover,
+html.dark .hourly-item:hover {
+  background: #1e3a5f !important;
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .timeline-hour.selected,
+html[data-theme="dark"] .timeline-hour.active,
+html[data-theme="dark"] .hour-card.selected,
+html[data-theme="dark"] .hour-card.active,
+html.dark .timeline-hour.selected,
+html.dark .timeline-hour.active,
+html.dark .hour-card.selected,
+html.dark .hour-card.active {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+/* Hour time text */
+html[data-theme="dark"] .hour-time,
+html[data-theme="dark"] .timeline-hour .time,
+html[data-theme="dark"] [class*="hour-time"],
+html.dark .hour-time,
+html.dark .timeline-hour .time,
+html.dark [class*="hour-time"] {
+  color: #a0aec0 !important;
+}
+
+/* Hour temperature */
+html[data-theme="dark"] .hour-temp,
+html[data-theme="dark"] .timeline-hour .temp,
+html[data-theme="dark"] [class*="hour-temp"],
+html.dark .hour-temp,
+html.dark .timeline-hour .temp,
+html.dark [class*="hour-temp"] {
+  color: #ffffff !important;
+}
+
+/* Precipitation indicator */
+html[data-theme="dark"] .precipitation-indicator,
+html[data-theme="dark"] [class*="precipitation"],
+html.dark .precipitation-indicator,
+html.dark [class*="precipitation"] {
+  color: #63b3ed !important;
+}
+
+/* Scroll hint */
+html[data-theme="dark"] .scroll-hint,
+html.dark .scroll-hint {
+  color: #718096 !important;
+}
+
+/* =============================================
+   HOUR DETAILS SECTION
+   ============================================= */
+
+html[data-theme="dark"] .hour-details,
+html[data-theme="dark"] .hourly-details,
+html[data-theme="dark"] [class*="hour-details"],
+html.dark .hour-details,
+html.dark .hourly-details,
+html.dark [class*="hour-details"] {
+  background: #16213e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .hour-details h4,
+html[data-theme="dark"] .details-header,
+html.dark .hour-details h4,
+html.dark .details-header {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .details-grid .detail-card,
+html[data-theme="dark"] .hour-details .detail-card,
+html.dark .details-grid .detail-card,
+html.dark .hour-details .detail-card {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .detail-card .detail-icon,
+html.dark .detail-card .detail-icon {
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .detail-card .detail-value,
+html[data-theme="dark"] .detail-card .value,
+html.dark .detail-card .detail-value,
+html.dark .detail-card .value {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .detail-card .detail-label,
+html[data-theme="dark"] .detail-card .label,
+html.dark .detail-card .detail-label,
+html.dark .detail-card .label {
+  color: #a0aec0 !important;
+}
+
+/* Condition summary */
+html[data-theme="dark"] .condition-summary,
+html.dark .condition-summary {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .condition-icon,
+html.dark .condition-icon {
+  background: #16213e !important;
+}
+
+html[data-theme="dark"] .condition-text,
+html[data-theme="dark"] .condition-description,
+html.dark .condition-text,
+html.dark .condition-description {
+  color: #e2e8f0 !important;
+}
+
+/* =============================================
+   TEMPERATURE CHART
+   ============================================= */
+
+html[data-theme="dark"] .temperature-chart,
+html[data-theme="dark"] .temp-chart,
+html[data-theme="dark"] [class*="temperature-chart"],
+html.dark .temperature-chart,
+html.dark .temp-chart,
+html.dark [class*="temperature-chart"] {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .chart-line::before,
+html.dark .chart-line::before {
+  background: #2d3748 !important;
+}
+
+html[data-theme="dark"] .point-label,
+html.dark .point-label {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .chart-legend,
+html.dark .chart-legend {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   FORECAST NOTE
+   ============================================= */
+
+html[data-theme="dark"] .forecast-note,
+html[data-theme="dark"] .weather-note,
+html.dark .forecast-note,
+html.dark .weather-note {
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   5-DAY / MULTI-DAY FORECAST
+   ============================================= */
+
+html[data-theme="dark"] .five-day-forecast,
+html[data-theme="dark"] .daily-forecast,
+html[data-theme="dark"] .weekly-forecast,
+html[data-theme="dark"] .multi-day-forecast,
+html[data-theme="dark"] [class*="five-day"],
+html[data-theme="dark"] [class*="daily-forecast"],
+html.dark .five-day-forecast,
+html.dark .daily-forecast,
+html.dark .weekly-forecast,
+html.dark .multi-day-forecast,
+html.dark [class*="five-day"],
+html.dark [class*="daily-forecast"] {
+  background: #1a1a2e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .five-day-forecast h3,
+html[data-theme="dark"] .daily-forecast h3,
+html.dark .five-day-forecast h3,
+html.dark .daily-forecast h3 {
+  color: #ffffff !important;
+}
+
+/* Forecast cards */
+html[data-theme="dark"] .forecast-card,
+html[data-theme="dark"] .day-card,
+html[data-theme="dark"] .daily-item,
+html.dark .forecast-card,
+html.dark .day-card,
+html.dark .daily-item {
+  background: #16213e !important;
+  border: 1px solid #2d3748 !important;
+}
+
+html[data-theme="dark"] .forecast-card:hover,
+html[data-theme="dark"] .day-card:hover,
+html.dark .forecast-card:hover,
+html.dark .day-card:hover {
+  background: #1e3a5f !important;
+  border-color: #667eea !important;
+}
+
+html[data-theme="dark"] .forecast-day,
+html[data-theme="dark"] .day-name,
+html.dark .forecast-day,
+html.dark .day-name {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .forecast-temp,
+html[data-theme="dark"] .day-temp,
+html.dark .forecast-temp,
+html.dark .day-temp {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .forecast-condition,
+html[data-theme="dark"] .day-condition,
+html.dark .forecast-condition,
+html.dark .day-condition {
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   GENERIC WHITE BACKGROUND FIX FOR OVERVIEW
+   ============================================= */
+
+/* Target any direct children of overview page with white backgrounds */
+html[data-theme="dark"] .overview-page > div,
+html[data-theme="dark"] .overview-page > section,
+html[data-theme="dark"] .overview-page > article,
+html.dark .overview-page > div,
+html.dark .overview-page > section,
+html.dark .overview-page > article {
+  background-color: transparent;
+}
+
+/* Force dark on any element with inline white background in overview */
+html[data-theme="dark"] .overview-page [style*="background: white"],
+html[data-theme="dark"] .overview-page [style*="background-color: white"],
+html[data-theme="dark"] .overview-page [style*="background:#fff"],
+html[data-theme="dark"] .overview-page [style*="background-color:#fff"],
+html[data-theme="dark"] .overview-page [style*="background: #fff"],
+html[data-theme="dark"] .overview-page [style*="background-color: #fff"],
+html.dark .overview-page [style*="background: white"],
+html.dark .overview-page [style*="background-color: white"],
+html.dark .overview-page [style*="background:#fff"],
+html.dark .overview-page [style*="background-color:#fff"],
+html.dark .overview-page [style*="background: #fff"],
+html.dark .overview-page [style*="background-color: #fff"] {
+  background-color: #1a1a2e !important;
+}
+
+/* =============================================
+   HEADER ACTION BUTTONS (FINAL FIX)
+   ============================================= */
+
+/* The specific oval/pill shaped notification element */
+html[data-theme="dark"] .content-header > div:last-child,
+html[data-theme="dark"] .header-right,
+html[data-theme="dark"] .header-controls,
+html.dark .content-header > div:last-child,
+html.dark .header-right,
+html.dark .header-controls {
+  background: transparent !important;
+}
+
+/* Any rounded/pill buttons in header */
+html[data-theme="dark"] .content-header button,
+html[data-theme="dark"] .content-header [class*="btn"],
+html.dark .content-header button,
+html.dark .content-header [class*="btn"] {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* The white oval you're seeing - target by structure */
+html[data-theme="dark"] .content-header > div > div,
+html.dark .content-header > div > div {
+  background: transparent !important;
+}
+
+/* If there's a specific notifications wrapper */
+html[data-theme="dark"] [class*="notif"],
+html.dark [class*="notif"] {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+/* =============================================
+   WHITE OVAL/PILL BUTTON FIXES
+   ============================================= */
+
+/* Settings Page Action Buttons (Save, Reset, Export) */
+html[data-theme="dark"] .settings-actions,
+html.dark .settings-actions {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .settings-actions button,
+html[data-theme="dark"] .settings-actions .action-btn,
+html[data-theme="dark"] .action-btn.primary-btn,
+html[data-theme="dark"] .action-btn.secondary-btn,
+html[data-theme="dark"] .action-btn.export-btn,
+html.dark .settings-actions button,
+html.dark .settings-actions .action-btn,
+html.dark .action-btn.primary-btn,
+html.dark .action-btn.secondary-btn,
+html.dark .action-btn.export-btn {
+  background: #1a1a2e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .settings-actions button:hover,
+html[data-theme="dark"] .settings-actions .action-btn:hover,
+html.dark .settings-actions button:hover,
+html.dark .settings-actions .action-btn:hover {
+  background: #16213e !important;
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+/* Primary action buttons should keep accent color */
+html[data-theme="dark"] .action-btn.primary-btn,
+html[data-theme="dark"] .primary-btn,
+html[data-theme="dark"] button.primary,
+html.dark .action-btn.primary-btn,
+html.dark .primary-btn,
+html.dark button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Test Notification Button */
+html[data-theme="dark"] .test-notification-btn,
+html[data-theme="dark"] .notification-test button,
+html[data-theme="dark"] [class*="test-notification"],
+html.dark .test-notification-btn,
+html.dark .notification-test button,
+html.dark [class*="test-notification"] {
+  background: #1a1a2e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .test-notification-btn:hover,
+html.dark .test-notification-btn:hover {
+  background: #16213e !important;
+  border-color: #667eea !important;
+}
+
+/* =============================================
+   FAVORITES PAGE - CARD ACTION BUTTONS FIX
+   ============================================= */
+
+/* The overlapping white ovals on favorite cards */
+html[data-theme="dark"] .favorite-card .favorite-actions,
+html[data-theme="dark"] .favorite-actions,
+html.dark .favorite-card .favorite-actions,
+html.dark .favorite-actions {
+  display: flex !important;
+  gap: 0.5rem !important;
+  flex-wrap: nowrap !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+html[data-theme="dark"] .favorite-actions button,
+html[data-theme="dark"] .favorite-actions .action-btn,
+html[data-theme="dark"] .favorite-actions .view-btn,
+html[data-theme="dark"] .favorite-actions .compare-btn,
+html[data-theme="dark"] .favorite-card button,
+html.dark .favorite-actions button,
+html.dark .favorite-actions .action-btn,
+html.dark .favorite-actions .view-btn,
+html.dark .favorite-actions .compare-btn,
+html.dark .favorite-card button {
+  background: #16213e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+  flex: 1 !important;
+  min-width: auto !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+}
+
+html[data-theme="dark"] .favorite-actions .view-btn,
+html.dark .favorite-actions .view-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .favorite-actions button:hover,
+html[data-theme="dark"] .favorite-actions .compare-btn:hover,
+html.dark .favorite-actions button:hover,
+html.dark .favorite-actions .compare-btn:hover {
+  background: #1e3a5f !important;
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+/* =============================================
+   GENERIC OVAL/PILL BUTTON FIXES
+   ============================================= */
+
+/* Any button with oval/pill shape */
+html[data-theme="dark"] button[class*="oval"],
+html[data-theme="dark"] button[class*="pill"],
+html[data-theme="dark"] [class*="btn-oval"],
+html[data-theme="dark"] [class*="btn-pill"],
+html[data-theme="dark"] [class*="rounded-btn"],
+html.dark button[class*="oval"],
+html.dark button[class*="pill"],
+html.dark [class*="btn-oval"],
+html.dark [class*="btn-pill"],
+html.dark [class*="rounded-btn"] {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Catch any remaining white buttons */
+html[data-theme="dark"] .settings-page button,
+html[data-theme="dark"] .favorites-page button,
+html[data-theme="dark"] .overview-page button:not(.gps-btn):not(.mini-btn):not(.refresh-icon),
+html.dark .settings-page button,
+html.dark .favorites-page button,
+html.dark .overview-page button:not(.gps-btn):not(.mini-btn):not(.refresh-icon) {
+  background: #1a1a2e !important;
+  border: 2px solid #2d3748 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Buttons that should remain colored */
+html[data-theme="dark"] .add-btn,
+html[data-theme="dark"] .save-profile-btn,
+html[data-theme="dark"] .save-btn,
+html[data-theme="dark"] .enable-notifications-btn,
+html[data-theme="dark"] .gps-btn,
+html[data-theme="dark"] .retry-btn,
+html[data-theme="dark"] .mini-btn,
+html[data-theme="dark"] .view-btn,
+html[data-theme="dark"] .table-action-btn,
+html[data-theme="dark"] .advanced-action,
+html.dark .add-btn,
+html.dark .save-profile-btn,
+html.dark .save-btn,
+html.dark .enable-notifications-btn,
+html.dark .gps-btn,
+html.dark .retry-btn,
+html.dark .mini-btn,
+html.dark .view-btn,
+html.dark .table-action-btn,
+html.dark .advanced-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Green buttons (Add, Save) */
+html[data-theme="dark"] .add-btn,
+html.dark .add-btn {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+}
+
+/* =============================================
+   ADVANCED SETTINGS BUTTONS
+   ============================================= */
+
+html[data-theme="dark"] .advanced-settings .advanced-action,
+html.dark .advanced-settings .advanced-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .advanced-settings .advanced-action:hover,
+html.dark .advanced-settings .advanced-action:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+  transform: translateY(-2px);
+}
+
+/* =============================================
+   FIX BUTTON TEXT VISIBILITY
+   ============================================= */
+
+/* Ensure button text is visible */
+html[data-theme="dark"] button span,
+html[data-theme="dark"] button::before,
+html[data-theme="dark"] .action-btn span,
+html.dark button span,
+html.dark button::before,
+html.dark .action-btn span {
+  color: inherit !important;
+}
+
+/* =============================================
+   LOCATION COMPARISON TABLE FIX
+   ============================================= */
+
+html[data-theme="dark"] .comparison-section table,
+html.dark .comparison-section table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+html[data-theme="dark"] .comparison-section th,
+html[data-theme="dark"] .comparison-section td,
+html.dark .comparison-section th,
+html.dark .comparison-section td {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+  padding: 1rem !important;
+}
+
+html[data-theme="dark"] .comparison-section th,
+html.dark .comparison-section th {
+  background: #16213e !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .comparison-section tr:hover td,
+html.dark .comparison-section tr:hover td {
+  background: #16213e !important;
+}
+
+/* =============================================
+   RESET DEFAULTS BUTTON SPECIFIC FIX
+   ============================================= */
+
+html[data-theme="dark"] .reset-btn,
+html[data-theme="dark"] [class*="reset"],
+html[data-theme="dark"] button:contains("Reset"),
+html.dark .reset-btn,
+html.dark [class*="reset"],
+html.dark button:contains("Reset") {
+  background: #1a1a2e !important;
+  border: 2px solid #f56565 !important;
+  color: #f56565 !important;
+}
+
+html[data-theme="dark"] .reset-btn:hover,
+html.dark .reset-btn:hover {
+  background: #f56565 !important;
+  color: #ffffff !important;
+}
+
+/* =============================================
+   EXPORT BUTTON SPECIFIC FIX  
+   ============================================= */
+
+html[data-theme="dark"] .export-btn,
+html[data-theme="dark"] [class*="export"],
+html.dark .export-btn,
+html.dark [class*="export"] {
+  background: #1a1a2e !important;
+  border: 2px solid #48bb78 !important;
+  color: #48bb78 !important;
+}
+
+html[data-theme="dark"] .export-btn:hover,
+html.dark .export-btn:hover {
+  background: #48bb78 !important;
+  color: #ffffff !important;
+}
+
+/* =============================================
+   SECONDARY/OUTLINE BUTTONS
+   ============================================= */
+
+html[data-theme="dark"] .secondary-btn,
+html[data-theme="dark"] .outline-btn,
+html[data-theme="dark"] .btn-outline,
+html[data-theme="dark"] .btn-secondary,
+html.dark .secondary-btn,
+html.dark .outline-btn,
+html.dark .btn-outline,
+html.dark .btn-secondary {
+  background: transparent !important;
+  border: 2px solid #667eea !important;
+  color: #667eea !important;
+}
+
+html[data-theme="dark"] .secondary-btn:hover,
+html[data-theme="dark"] .outline-btn:hover,
+html.dark .secondary-btn:hover,
+html.dark .outline-btn:hover {
+  background: #667eea !important;
+  color: #ffffff !important;
+}

@@ -5,9 +5,25 @@
   box-sizing: border-box;
 }
 
+html, body, #root {
+  min-height: 100vh;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  /* REMOVE background here */
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #2d3748);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Force dark mode when data-theme is dark */
+html[data-theme="dark"] body {
+  background-color: #0f0f1a !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] #root {
+  background-color: #0f0f1a !important;
 }
 
 /* CSS Variables for your weather app */
