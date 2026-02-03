@@ -1,279 +1,483 @@
 import React, { useState, useEffect } from 'react';
-import { weatherAPI } from '../../scripts/weatherAPI';
-import '../../styles/pages/FavoritesPage.css';
+import { useNavigate } from 'react-router-dom';
+import { overviewLogic } from '../../scripts/overviewPage';
+import { useSettings } from '../../context/settingsContext';
+import '../../styles/pages/OverviewPage.css';
 
-const FavoritesPage = () => {
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [newCity, setNewCity] = useState('');
+const OverviewPage = () => {
+  const [state, setState] = useState(overviewLogic.initialState);
+  const navigate = useNavigate();
+  
+  // Get conversion utilities from settings context
+  const { 
+    convertTemperature, 
+    getTempUnit, 
+    convertSpeed, 
+    getSpeedUnit,
+    settings 
+  } = useSettings();
 
   useEffect(() => {
-    loadFavorites();
+    loadData();
   }, []);
 
-  const loadFavorites = async () => {
-    try {
-      setLoading(true);
-      // Load from localStorage or API
-      const savedFavorites = JSON.parse(localStorage.getItem('weatherFavorites')) || [
-        { id: 1, name: 'Nairobi', country: 'Kenya', temp: 24, condition: 'Partly Cloudy' },
-        { id: 2, name: 'Mombasa', country: 'Kenya', temp: 28, condition: 'Sunny' },
-        { id: 3, name: 'London', country: 'UK', temp: 12, condition: 'Cloudy' },
-        { id: 4, name: 'Tokyo', country: 'Japan', temp: 18, condition: 'Clear' }
-      ];
-      
-      // Fetch updated weather for each favorite
-      const updatedFavorites = await Promise.all(
-        savedFavorites.map(async fav => {
-          try {
-            const weather = await weatherAPI.getCurrentWeather(fav.name);
-            return {
-              ...fav,
-              temp: weather.temperature || fav.temp,
-              condition: weather.condition || fav.condition,
-              humidity: weather.humidity,
-              windSpeed: weather.windSpeed
-            };
-          } catch (error) {
-            return fav; // Return original if API fails
-          }
-        })
+  const loadData = async () => {
+    const data = await overviewLogic.fetchAllData(state.currentLocation);
+    setState(prev => ({ ...prev, ...data, loading: false }));
+  };
+
+  const handleLocationChange = (location) => {
+    overviewLogic.handleLocationChange(location, setState);
+  };
+
+  const handleIconClick = (action) => {
+    switch(action) {
+      case 'micro-climate':
+        navigate('/dashboard?page=radar');
+        break;
+      case 'weather-memory':
+        navigate('/dashboard?page=history');
+        break;
+      case 'home-widget':
+        alert('Home widget configuration will open in a new window');
+        break;
+      case 'moon-phase':
+        alert('Moon phase details will be shown in a modal');
+        break;
+      default:
+        console.log('Icon clicked:', action);
+    }
+  };
+
+  const handleHourSelect = (hourData) => {
+    overviewLogic.handleHourSelect(hourData, setState);
+  };
+
+  const handleRefresh = () => {
+    overviewLogic.handleRefresh(state, setState);
+  };
+
+  const handleGPSLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          alert(`Your location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+        },
+        (err) => alert('Unable to get your location: ' + err.message)
       );
-      
-      setFavorites(updatedFavorites);
-      localStorage.setItem('weatherFavorites', JSON.stringify(updatedFavorites));
-    } catch (error) {
-      console.error('Error loading favorites:', error);
-    } finally {
-      setLoading(false);
+    } else {
+      alert('Geolocation is not supported by your browser');
     }
   };
 
-  const addFavorite = async () => {
-    if (!newCity.trim()) return;
-    
-    try {
-      const weather = await weatherAPI.getCurrentWeather(newCity);
-      const newFavorite = {
-        id: Date.now(),
-        name: newCity,
-        country: weather.country || 'Unknown',
-        temp: weather.temperature,
-        condition: weather.condition,
-        humidity: weather.humidity,
-        windSpeed: weather.windSpeed
-      };
-      
-      const updatedFavorites = [...favorites, newFavorite];
-      setFavorites(updatedFavorites);
-      localStorage.setItem('weatherFavorites', JSON.stringify(updatedFavorites));
-      setNewCity('');
-    } catch (error) {
-      alert('Failed to add city. Please check the name and try again.');
-    }
-  };
-
-  const removeFavorite = (id) => {
-    const updatedFavorites = favorites.filter(fav => fav.id !== id);
-    setFavorites(updatedFavorites);
-    localStorage.setItem('weatherFavorites', JSON.stringify(updatedFavorites));
-  };
-
-  const refreshFavorites = () => {
-    loadFavorites();
-  };
+  const { loading, error, weatherData, hourlyData, selectedHour, currentLocation, forecastData } = state;
 
   if (loading) {
     return (
-      <div className="favorites-page">
+      <div className="overview-page">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading your favorite locations...</p>
+          <p>Loading weather data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="favorites-page">
-      <div className="favorites-header">
-        <div>
-          <h2>⭐ Favorite Locations</h2>
-          <p>Your saved weather locations at a glance</p>
-        </div>
-        <button className="refresh-btn" onClick={refreshFavorites}>
-          🔄 Refresh All
-        </button>
-      </div>
+    <div className="overview-page">
+      {/* Location Selector */}
+      <LocationSelector 
+        currentLocation={currentLocation}
+        onLocationChange={handleLocationChange}
+        onGPSClick={handleGPSLocation}
+      />
 
-      <div className="add-favorite-section">
-        <h3>Add New Favorite</h3>
-        <div className="add-favorite-form">
-          <input
-            type="text"
-            value={newCity}
-            onChange={(e) => setNewCity(e.target.value)}
-            placeholder="Enter city name (e.g., Paris, FR)"
-            className="city-input"
-          />
-          <button className="add-btn" onClick={addFavorite}>
-            ➕ Add Location
+      {/* Weather Summary */}
+      <WeatherSummary 
+        weatherData={weatherData}
+        onRefresh={handleRefresh}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+        convertSpeed={convertSpeed}
+        getSpeedUnit={getSpeedUnit}
+      />
+
+      {/* Hourly Forecast Section */}
+      <HourlyForecastSection 
+        hourlyData={hourlyData}
+        selectedHour={selectedHour}
+        city={currentLocation}
+        onHourSelect={handleHourSelect}
+        onRefresh={handleRefresh}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+        convertSpeed={convertSpeed}
+        getSpeedUnit={getSpeedUnit}
+      />
+
+      {/* 5-Day Forecast */}
+      <FiveDayForecast 
+        forecastData={forecastData}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+      />
+
+      {/* Features Grid */}
+      <FeaturesGrid 
+        features={overviewLogic.getFeatures()}
+        onIconClick={handleIconClick}
+      />
+
+      {/* Data Actions */}
+      <DataActions onRefresh={handleRefresh} />
+
+      {/* Error Banner */}
+      {error && <ErrorBanner error={error} />}
+    </div>
+  );
+};
+
+// ============ SUB-COMPONENTS ============
+
+const LocationSelector = ({ currentLocation, onLocationChange, onGPSClick }) => (
+  <div className="location-selector">
+    <select 
+      value={currentLocation}
+      onChange={(e) => onLocationChange(e.target.value)}
+      className="location-select"
+    >
+      <option value="Nairobi">Nairobi, Kenya</option>
+      <option value="Mombasa">Mombasa, Kenya</option>
+      <option value="London">London, UK</option>
+      <option value="New York">New York, USA</option>
+      <option value="Tokyo">Tokyo, Japan</option>
+    </select>
+    <button className="gps-btn" onClick={onGPSClick}>
+      📍 Use My Location
+    </button>
+  </div>
+);
+
+const WeatherSummary = ({ 
+  weatherData, 
+  onRefresh, 
+  convertTemperature, 
+  getTempUnit,
+  convertSpeed,
+  getSpeedUnit 
+}) => {
+  const tempUnit = getTempUnit();
+  const speedUnit = getSpeedUnit();
+  
+  // Get metrics with converted values
+  const getConvertedMetrics = () => {
+    if (!weatherData) return {};
+    
+    return {
+      humidity: {
+        icon: '💧',
+        value: `${weatherData.humidity || '--'}%`,
+        label: 'Humidity'
+      },
+      wind: {
+        icon: '💨',
+        value: `${convertSpeed(weatherData.windSpeed, 'kmh')} ${speedUnit}`,
+        label: 'Wind Speed'
+      },
+      pressure: {
+        icon: '🌡️',
+        value: `${weatherData.pressure || '--'} hPa`,
+        label: 'Pressure'
+      },
+      uv: {
+        icon: '☀️',
+        value: weatherData.uvIndex || '--',
+        label: 'UV Index',
+        level: weatherData.uvLevel
+      }
+    };
+  };
+
+  const metrics = getConvertedMetrics();
+
+  return (
+    <div className="weather-summary">
+      <div className="current-weather-card">
+        <div className="card-header">
+          <h2>🌤️ Current Weather</h2>
+          <button className="refresh-icon" onClick={onRefresh} title="Refresh data">
+            🔄
           </button>
         </div>
-        <p className="form-hint">Press Enter or click Add to save the location</p>
-      </div>
-
-      <div className="favorites-grid">
-        {favorites.length > 0 ? (
-          favorites.map(favorite => (
-            <div key={favorite.id} className="favorite-card">
-              <div className="favorite-header">
-                <div className="location-info">
-                  <h3>{favorite.name}</h3>
-                  <p className="country">{favorite.country}</p>
-                </div>
-                <button 
-                  className="remove-btn"
-                  onClick={() => removeFavorite(favorite.id)}
-                  title="Remove from favorites"
-                >
-                  ❌
-                </button>
-              </div>
-              
-              <div className="weather-info">
-                <div className="temperature">
-                  <span className="temp-value">{favorite.temp}°C</span>
-                  <span className="condition">{favorite.condition}</span>
-                </div>
-                
-                <div className="weather-details">
-                  <div className="detail">
-                    <span className="detail-icon">💧</span>
-                    <span className="detail-value">{favorite.humidity || '--'}%</span>
-                  </div>
-                  <div className="detail">
-                    <span className="detail-icon">💨</span>
-                    <span className="detail-value">{favorite.windSpeed || '--'} km/h</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="favorite-actions">
-                <button className="action-btn view-btn">
-                  👁️ View Details
-                </button>
-                <button className="action-btn compare-btn">
-                  📊 Compare
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="empty-favorites">
-            <div className="empty-icon">⭐</div>
-            <h4>No favorite locations yet</h4>
-            <p>Add cities above to see their weather here</p>
-          </div>
-        )}
-      </div>
-
-      {favorites.length > 0 && (
-        <div className="comparison-section">
-          <h3>📍 Location Comparison</h3>
-          <div className="comparison-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>City</th>
-                  <th>Temp (°C)</th>
-                  <th>Condition</th>
-                  <th>Humidity</th>
-                  <th>Wind Speed</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {favorites.map(fav => (
-                  <tr key={fav.id}>
-                    <td>
-                      <strong>{fav.name}</strong>
-                      <div className="country-small">{fav.country}</div>
-                    </td>
-                    <td className="temp-cell">{fav.temp}°C</td>
-                    <td>
-                      <span className="condition-badge">{fav.condition}</span>
-                    </td>
-                    <td>{fav.humidity || '--'}%</td>
-                    <td>{fav.windSpeed || '--'} km/h</td>
-                    <td>
-                      <button className="table-action-btn">📈 View Graph</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="temp">
+          {convertTemperature(weatherData?.temperature, 'celsius')}{tempUnit}
         </div>
+        <div className="condition">{weatherData?.condition}</div>
+        <div className="location">
+          {weatherData?.city}, {weatherData?.country}
+        </div>
+      </div>
+      
+      <div className="weather-metrics">
+        {Object.entries(metrics).map(([key, metric]) => (
+          <div key={key} className="metric-card">
+            <span className="metric-icon">{metric.icon}</span>
+            <div className="metric-info">
+              <div className="metric-value">{metric.value}</div>
+              <div className="metric-label">{metric.label}</div>
+              {metric.level && <div className="uv-level">{metric.level}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const HourlyForecastSection = ({ 
+  hourlyData, 
+  selectedHour, 
+  city, 
+  onHourSelect, 
+  onRefresh,
+  convertTemperature,
+  getTempUnit,
+  convertSpeed,
+  getSpeedUnit
+}) => {
+  const temperatureTrend = overviewLogic.calculateTemperatureTrend(hourlyData);
+
+  return (
+    <div className="hourly-forecast-section">
+      <div className="section-header">
+        <h3>⏰ 24-Hour Forecast</h3>
+        <div className="header-actions">
+          <span className="location">{city}</span>
+          <button className="refresh-btn" onClick={onRefresh} title="Refresh forecast">
+            🔄
+          </button>
+        </div>
+      </div>
+
+      {/* Hourly Timeline */}
+      <div className="hourly-timeline">
+        <div className="timeline-container">
+          {hourlyData.slice(0, 12).map((hour) => (
+            <HourItem
+              key={hour.hour}
+              hour={hour}
+              isSelected={selectedHour?.hour === hour.hour}
+              onClick={() => onHourSelect(hour)}
+              convertTemperature={convertTemperature}
+              getTempUnit={getTempUnit}
+            />
+          ))}
+        </div>
+        
+        <div className="scroll-hint">
+          <span className="scroll-icon">→</span>
+          <span>Scroll for more hours</span>
+        </div>
+      </div>
+
+      {/* Selected Hour Details */}
+      {selectedHour && (
+        <HourDetails 
+          hour={selectedHour}
+          convertTemperature={convertTemperature}
+          getTempUnit={getTempUnit}
+          convertSpeed={convertSpeed}
+          getSpeedUnit={getSpeedUnit}
+        />
       )}
 
-      <div className="favorites-stats">
-        <div className="stat-card">
-          <div className="stat-icon">📍</div>
-          <div className="stat-info">
-            <div className="stat-value">{favorites.length}</div>
-            <div className="stat-label">Saved Locations</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">🌡️</div>
-          <div className="stat-info">
-            <div className="stat-value">
-              {favorites.length > 0 
-                ? (favorites.reduce((sum, fav) => sum + fav.temp, 0) / favorites.length).toFixed(1)
-                : '0'
-              }°C
-            </div>
-            <div className="stat-label">Average Temp</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">🕒</div>
-          <div className="stat-info">
-            <div className="stat-value">5 min</div>
-            <div className="stat-label">Update Interval</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">🌍</div>
-          <div className="stat-info">
-            <div className="stat-value">
-              {new Set(favorites.map(f => f.country)).size}
-            </div>
-            <div className="stat-label">Countries</div>
-          </div>
-        </div>
-      </div>
+      {/* Temperature Chart */}
+      {temperatureTrend && (
+        <TemperatureChart 
+          hourlyData={temperatureTrend.slice(0, 12)}
+          convertTemperature={convertTemperature}
+          getTempUnit={getTempUnit}
+        />
+      )}
 
-      <div className="quick-actions">
-        <h3>⚡ Quick Actions</h3>
-        <div className="action-buttons">
-          <button className="quick-action-btn" onClick={() => alert('Export coming soon!')}>
-            📥 Export All Data
-          </button>
-          <button className="quick-action-btn" onClick={() => alert('Share coming soon!')}>
-            📤 Share Favorites
-          </button>
-          <button className="quick-action-btn" onClick={() => setFavorites([])}>
-            🗑️ Clear All
-          </button>
+      <div className="forecast-note">
+        <p>
+          <strong>Note:</strong> Hourly forecasts are estimates based on current weather patterns 
+          and may change. Updated every 15 minutes.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const HourItem = ({ hour, isSelected, onClick, convertTemperature, getTempUnit }) => {
+  const tempUnit = getTempUnit();
+  const convertedTemp = convertTemperature(hour.temperature, 'celsius');
+  
+  return (
+    <div
+      className={`timeline-hour ${isSelected ? 'selected' : ''}`}
+      onClick={onClick}
+      title={`${hour.displayHour}: ${convertedTemp}${tempUnit}, ${hour.condition}`}
+    >
+      <div className="hour-time">{hour.displayHour}</div>
+      <div className="hour-icon">{hour.icon}</div>
+      <div 
+        className="hour-temp"
+        style={{ color: overviewLogic.getTemperatureColor(hour.temperature) }}
+      >
+        {convertedTemp}°
+      </div>
+      {hour.precipitation > 0 && (
+        <div className="precipitation-indicator">
+          <span className="raindrop">💧</span>
+          <span className="precipitation-value">{Math.round(hour.precipitation)}%</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const HourDetails = ({ hour, convertTemperature, getTempUnit, convertSpeed, getSpeedUnit }) => {
+  const tempUnit = getTempUnit();
+  const speedUnit = getSpeedUnit();
+  
+  const details = [
+    { key: 'temperature', icon: '🌡️', label: 'Temperature', value: `${convertTemperature(hour.temperature, 'celsius')}${tempUnit}` },
+    { key: 'feelsLike', icon: '🤔', label: 'Feels Like', value: `${convertTemperature(hour.feelsLike, 'celsius')}${tempUnit}` },
+    { key: 'humidity', icon: '💧', label: 'Humidity', value: `${hour.humidity}%` },
+    { key: 'windSpeed', icon: '💨', label: 'Wind Speed', value: `${convertSpeed(hour.windSpeed, 'kmh')} ${speedUnit}` },
+    { key: 'precipitation', icon: '🌧️', label: 'Precipitation', value: `${hour.precipitation}%` },
+    { key: 'uvIndex', icon: '👁️', label: 'UV Index', value: hour.uvIndex }
+  ];
+  
+  return (
+    <div className="hour-details">
+      <div className="details-header">
+        <h4>{hour.displayHour} Details</h4>
+        {hour.hour === new Date().getHours() && (
+          <span className="current-badge">Current</span>
+        )}
+      </div>
+      
+      <div className="details-grid">
+        {details.map(item => (
+          <div key={item.key} className="detail-card">
+            <div className="detail-icon">{item.icon}</div>
+            <div className="detail-info">
+              <div className="detail-value">{item.value}</div>
+              <div className="detail-label">{item.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="condition-summary">
+        <div className="condition-icon">{hour.icon}</div>
+        <div className="condition-info">
+          <h5>{hour.condition}</h5>
+          <p>Weather conditions at {hour.displayHour}</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default FavoritesPage;
+const TemperatureChart = ({ hourlyData, convertTemperature, getTempUnit }) => {
+  const tempUnit = getTempUnit();
+  
+  return (
+    <div className="temperature-chart">
+      <h4>Temperature Trend</h4>
+      <div className="chart-container">
+        <div className="chart-line">
+          {hourlyData.map((hour, index) => (
+            <div key={index} className="chart-point">
+              <div 
+                className="point"
+                style={{
+                  bottom: `${hour.chartHeight}%`,
+                  backgroundColor: overviewLogic.getTemperatureColor(hour.temperature)
+                }}
+                title={`${hour.displayHour}: ${convertTemperature(hour.temperature, 'celsius')}${tempUnit}`}
+              ></div>
+              <div className="point-label">{hour.displayHour}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="chart-legend">
+        {['cold', 'cool', 'warm', 'hot'].map(type => (
+          <div key={type} className="legend-item">
+            <div className={`legend-color ${type}`}></div>
+            <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FiveDayForecast = ({ forecastData, convertTemperature, getTempUnit }) => {
+  const forecast = overviewLogic.getFiveDayForecast(forecastData);
+  const tempUnit = getTempUnit();
+  
+  if (!forecast.length) return null;
+
+  return (
+    <div className="five-day-forecast">
+      <h3>📅 5-Day Forecast</h3>
+      <div className="forecast-cards">
+        {forecast.map((day, index) => (
+          <div key={index} className="forecast-card">
+            <div className="forecast-day">{day.day}</div>
+            <div className="forecast-icon">{day.icon}</div>
+            <div className="forecast-temp">
+              {convertTemperature(day.temperature, 'celsius')}{tempUnit}
+            </div>
+            <div className="forecast-condition">{day.condition}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FeaturesGrid = ({ features, onIconClick }) => (
+  <div className="features-grid">
+    {features.map(feature => (
+      <div 
+        key={feature.id}
+        className="feature-card clickable" 
+        onClick={() => onIconClick(feature.id)}
+      >
+        <div className="feature-icon">{feature.icon}</div>
+        <h3>{feature.title}</h3>
+        <p>{feature.desc}</p>
+        {feature.extra && <div className="feature-extra">{feature.extra}</div>}
+      </div>
+    ))}
+  </div>
+);
+
+const DataActions = ({ onRefresh }) => (
+  <div className="data-actions">
+    <button className="refresh-btn" onClick={onRefresh}>
+      🔄 Refresh Data
+    </button>
+    <span className="last-updated">
+      Last updated: {new Date().toLocaleTimeString()}
+    </span>
+  </div>
+);
+
+const ErrorBanner = ({ error }) => (
+  <div className="error-banner">
+    <span className="error-icon">⚠️</span>
+    <span>{error}</span>
+  </div>
+);
+
+export default OverviewPage;

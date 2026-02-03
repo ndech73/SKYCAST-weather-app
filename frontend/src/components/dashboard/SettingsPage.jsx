@@ -12,10 +12,12 @@ const SettingsPage = () => {
     updateSetting,
     updateSettings,
     updateUserProfile,
-    isInitialized
+    isInitialized,
+    getTempUnit,
+    getSpeedUnit
   } = useSettings();
 
-  // Local state for notification-specific settings (complex nested object)
+  // Local state for notification-specific settings
   const [weatherNotifications, setWeatherNotifications] = useState({
     enabled: false,
     permission: 'default',
@@ -28,6 +30,7 @@ const SettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [notificationStatus, setNotificationStatus] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const fileInputRef = useRef(null);
 
   // Load notification settings from localStorage on mount
@@ -64,7 +67,7 @@ const SettingsPage = () => {
   // Handle setting change - updates context immediately
   const handleSettingChange = (key, value) => {
     updateSetting(key, value);
-    showSaveMessage('Setting updated!', true);
+    setHasUnsavedChanges(true);
   };
 
   const handleNotificationSettingChange = (key, value) => {
@@ -72,11 +75,13 @@ const SettingsPage = () => {
       ...prev,
       [key]: value
     }));
+    setHasUnsavedChanges(true);
   };
 
   // Handle profile change - updates context immediately
   const handleProfileChange = (key, value) => {
     updateUserProfile({ [key]: value });
+    setHasUnsavedChanges(true);
   };
 
   const handleImageUpload = (e) => {
@@ -98,6 +103,7 @@ const SettingsPage = () => {
           avatarImage: reader.result,
           avatar: null
         });
+        setHasUnsavedChanges(true);
         showSaveMessage('Profile image updated!', true);
       };
       reader.readAsDataURL(file);
@@ -112,6 +118,7 @@ const SettingsPage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setHasUnsavedChanges(true);
     showSaveMessage('Profile image removed', true);
   };
 
@@ -143,31 +150,7 @@ const SettingsPage = () => {
     }
   };
 
-  const sendTestNotification = async () => {
-    if (!notificationManager.isEnabled()) {
-      setNotificationStatus('❌ Please enable notifications first');
-      setTimeout(() => setNotificationStatus(''), 3000);
-      return;
-    }
-
-    try {
-      const location = userProfile.location || 'Nairobi';
-      const weatherData = await weatherAPI.getCurrentWeather(location);
-      
-      if (weatherData) {
-        notificationManager.sendNotification(weatherData, 'test');
-        setNotificationStatus('🧪 Test notification sent!');
-        
-        handleNotificationSettingChange('lastNotificationTime', new Date().toISOString());
-      }
-    } catch (error) {
-      console.error('Error sending test notification:', error);
-      setNotificationStatus('❌ Error sending notification');
-    }
-
-    setTimeout(() => setNotificationStatus(''), 3000);
-  };
-
+  // Toggle periodic notifications
   const togglePeriodicNotifications = async (enabled) => {
     handleNotificationSettingChange('periodicUpdates', enabled);
 
@@ -177,15 +160,7 @@ const SettingsPage = () => {
 
       const fetchWeather = async () => {
         try {
-          const data = await weatherAPI.getCurrentWeather(location);
-          return {
-            city: location,
-            temperature: data.temp || data.temperature,
-            condition: data.condition || data.weather,
-            precipitation: data.precipitation || data.rain || 0,
-            wind: data.wind || data.windSpeed,
-            feelsLike: data.feelsLike || data.feels_like
-          };
+          return await weatherAPI.getCurrentWeather(location);
         } catch (error) {
           console.error('Error fetching weather:', error);
           return null;
@@ -202,6 +177,7 @@ const SettingsPage = () => {
     setTimeout(() => setNotificationStatus(''), 3000);
   };
 
+  // Toggle change alerts
   const toggleChangeAlerts = async (enabled) => {
     handleNotificationSettingChange('changeAlerts', enabled);
 
@@ -210,15 +186,7 @@ const SettingsPage = () => {
 
       const fetchWeather = async () => {
         try {
-          const data = await weatherAPI.getCurrentWeather(location);
-          return {
-            city: location,
-            temperature: data.temp || data.temperature,
-            condition: data.condition || data.weather,
-            precipitation: data.precipitation || data.rain || 0,
-            wind: data.wind || data.windSpeed,
-            feelsLike: data.feelsLike || data.feels_like
-          };
+          return await weatherAPI.getCurrentWeather(location);
         } catch (error) {
           console.error('Error fetching weather:', error);
           return null;
@@ -255,45 +223,34 @@ const SettingsPage = () => {
     };
   }, [weatherNotifications.periodicUpdates]);
 
-  const saveUserProfile = () => {
-    if (!userProfile.name?.trim()) {
-      showSaveMessage('Please enter your name', false);
-      return;
-    }
-
-    if (!userProfile.email?.trim()) {
-      showSaveMessage('Please enter your email', false);
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(userProfile.email)) {
-      showSaveMessage('Please enter a valid email address', false);
-      return;
-    }
-
-    if (!userProfile.location?.trim()) {
-      showSaveMessage('Please enter your default location', false);
-      return;
+  // Save all settings
+  const saveAllSettings = async () => {
+    // Validate email if provided
+    if (userProfile.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userProfile.email)) {
+        showSaveMessage('Please enter a valid email address', false);
+        return;
+      }
     }
 
     setIsSaving(true);
     
-    // Profile is automatically saved via context, just show confirmation
-    setTimeout(() => {
+    try {
+      // Save notification settings to localStorage
+      localStorage.setItem('weatherNotifications', JSON.stringify(weatherNotifications));
+      
+      // Simulate save delay for UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setHasUnsavedChanges(false);
+      showSaveMessage('All settings saved successfully!', true);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      showSaveMessage('Error saving settings. Please try again.', false);
+    } finally {
       setIsSaving(false);
-      showSaveMessage('Profile saved successfully!', true);
-    }, 800);
-  };
-
-  const saveSettings = () => {
-    setIsSaving(true);
-    
-    // Settings are automatically saved via context, just show confirmation
-    setTimeout(() => {
-      setIsSaving(false);
-      showSaveMessage('Settings saved successfully!', true);
-    }, 1000);
+    }
   };
 
   const resetToDefaults = () => {
@@ -314,7 +271,7 @@ const SettingsPage = () => {
       // Reset notification settings
       const defaultNotifications = {
         enabled: false,
-        permission: 'default',
+        permission: Notification.permission || 'default',
         periodicUpdates: false,
         updateInterval: 60,
         changeAlerts: false,
@@ -323,6 +280,7 @@ const SettingsPage = () => {
       setWeatherNotifications(defaultNotifications);
       localStorage.setItem('weatherNotifications', JSON.stringify(defaultNotifications));
 
+      setHasUnsavedChanges(false);
       showSaveMessage('Settings reset to defaults', true);
     }
   };
@@ -344,7 +302,17 @@ const SettingsPage = () => {
     link.href = url;
     link.download = `skycast-settings-${new Date().getTime()}.json`;
     link.click();
+    URL.revokeObjectURL(url);
   };
+
+  const clearCache = () => {
+    localStorage.removeItem('weatherCache');
+    showSaveMessage('Cache cleared!', true);
+  };
+
+  // Get current units for display
+  const tempUnit = getTempUnit();
+  const speedUnit = getSpeedUnit();
 
   return (
     <div className="settings-page">
@@ -353,11 +321,26 @@ const SettingsPage = () => {
           <h2>⚙️ Settings</h2>
           <p>Customize your SkyCast experience</p>
         </div>
-        {saveMessage && (
-          <div className={`save-message ${saveMessage.isSuccess ? 'success' : 'error'}`}>
-            {saveMessage.isSuccess ? '✅' : '⚠️'} {saveMessage.text}
-          </div>
-        )}
+        <div className="header-actions">
+          {hasUnsavedChanges && (
+            <span className="unsaved-indicator" style={{
+              color: '#ed8936',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              padding: '0.5rem 1rem',
+              background: 'rgba(237, 137, 54, 0.1)',
+              borderRadius: '20px',
+              border: '1px solid rgba(237, 137, 54, 0.3)'
+            }}>
+              ● Unsaved changes
+            </span>
+          )}
+          {saveMessage && (
+            <div className={`save-message ${saveMessage.isSuccess ? 'success' : 'error'}`}>
+              {saveMessage.isSuccess ? '✅' : '⚠️'} {saveMessage.text}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="settings-grid">
@@ -428,50 +411,42 @@ const SettingsPage = () => {
             
             <div className="profile-form">
               <div className="form-group">
-                <label>Name *</label>
+                <label>Name</label>
                 <input
                   type="text"
                   value={userProfile.name || ''}
                   onChange={(e) => handleProfileChange('name', e.target.value)}
                   placeholder="Enter your name"
-                  required
                 />
               </div>
               
               <div className="form-group">
-                <label>Email *</label>
+                <label>Email</label>
                 <input
                   type="email"
                   value={userProfile.email || ''}
                   onChange={(e) => handleProfileChange('email', e.target.value)}
                   placeholder="email@example.com"
-                  required
                 />
               </div>
               
               <div className="form-group">
-                <label>Default Location *</label>
+                <label>Default Location</label>
                 <input
                   type="text"
                   value={userProfile.location || ''}
                   onChange={(e) => handleProfileChange('location', e.target.value)}
                   placeholder="e.g., Nairobi, Kenya"
-                  required
                 />
+                <p className="form-hint" style={{ fontSize: '0.85rem', color: '#718096', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                  Used for weather notifications and default forecasts
+                </p>
               </div>
-
-              <button 
-                className="save-profile-btn"
-                onClick={saveUserProfile}
-                disabled={isSaving}
-              >
-                {isSaving ? '💾 Saving...' : '💾 Save Profile'}
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Weather Preferences - Moved Up */}
+        {/* Weather Preferences */}
         <div className="settings-section">
           <h3>🌤️ Weather Preferences</h3>
           <div className="preferences-grid">
@@ -497,6 +472,17 @@ const SettingsPage = () => {
                   <span className="radio-text">Imperial (°F, mph)</span>
                 </label>
               </div>
+              <p className="preference-note" style={{
+                fontSize: '0.85rem',
+                color: '#718096',
+                marginTop: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                background: 'rgba(102, 126, 234, 0.1)',
+                borderRadius: '6px',
+                borderLeft: '3px solid #667eea'
+              }}>
+                Currently using: {tempUnit} for temperature, {speedUnit} for wind speed
+              </p>
             </div>
 
             <div className="preference-item">
@@ -541,7 +527,7 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Theme & Appearance - Now Using Context */}
+        {/* Theme & Appearance */}
         <div className="settings-section">
           <h3>🎨 Theme & Appearance</h3>
           <div className="theme-selector">
@@ -565,7 +551,7 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Language - Now Using Context */}
+        {/* Language */}
         <div className="settings-section">
           <h3>🌐 Language</h3>
           <div className="language-selector">
@@ -680,36 +666,26 @@ const SettingsPage = () => {
 
                   {weatherNotifications.changeAlerts && (
                     <div className="alert-info">
-                      <p>🌡️ Temperature changes ±2°C</p>
+                      <p>🌡️ Temperature changes ±3{tempUnit}</p>
                       <p>💧 Precipitation changes ±20%</p>
                       <p>🌤️ Weather condition changes</p>
-                      <p>💨 Wind speed changes ±15 km/h</p>
+                      <p>💨 Wind speed changes ±15 {speedUnit}</p>
                     </div>
                   )}
                 </div>
 
                 <div className="notification-divider"></div>
 
-                <div className="notification-test">
-                  <button 
-                    className="test-notification-btn"
-                    onClick={sendTestNotification}
-                  >
-                    🧪 Send Test Notification
-                  </button>
-                  
-                  {weatherNotifications.lastNotificationTime && (
-                    <p className="last-notification">
-                      Last notification: {new Date(weatherNotifications.lastNotificationTime).toLocaleString()}
-                    </p>
-                  )}
-                </div>
-
                 <div className="notification-help">
                   <p className="help-text">
                     💡 <strong>Tip:</strong> Keep this tab open in the background to receive notifications. 
                     For best results, set your default location in the profile section above.
                   </p>
+                  {weatherNotifications.lastNotificationTime && (
+                    <p className="last-notification" style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#718096' }}>
+                      Last notification: {new Date(weatherNotifications.lastNotificationTime).toLocaleString()}
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -767,26 +743,127 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="settings-actions">
+      {/* Action Buttons - With Inline Styles for Visibility */}
+      <div 
+        className="settings-actions"
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          marginTop: '2rem',
+          padding: '1.5rem',
+          backgroundColor: 'var(--bg-card, #f0f4f8)',
+          borderRadius: '12px',
+          border: '1px solid var(--border-color, #e2e8f0)',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
         <button 
-          className="action-btn primary-btn"
-          onClick={saveSettings}
+          type="button"
+          onClick={saveAllSettings}
           disabled={isSaving}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '14px 28px',
+            fontSize: '16px',
+            fontWeight: '600',
+            borderRadius: '10px',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            border: 'none',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#ffffff',
+            minWidth: '180px',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+            opacity: isSaving ? 0.7 : 1,
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            if (!isSaving) {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+            }
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+          }}
         >
-          {isSaving ? 'Saving...' : '💾 Save All Settings'}
+          {isSaving ? '⏳ Saving...' : '💾 Save Changes'}
         </button>
         
         <button 
-          className="action-btn secondary-btn"
+          type="button"
           onClick={resetToDefaults}
+          disabled={isSaving}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '14px 28px',
+            fontSize: '16px',
+            fontWeight: '600',
+            borderRadius: '10px',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            background: 'transparent',
+            color: '#e53e3e',
+            border: '2px solid #e53e3e',
+            minWidth: '180px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            if (!isSaving) {
+              e.currentTarget.style.background = '#e53e3e';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#e53e3e';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
         >
           🔄 Reset to Defaults
         </button>
         
         <button 
-          className="action-btn export-btn"
+          type="button"
           onClick={exportData}
+          disabled={isSaving}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '14px 28px',
+            fontSize: '16px',
+            fontWeight: '600',
+            borderRadius: '10px',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            background: 'transparent',
+            color: '#38a169',
+            border: '2px solid #38a169',
+            minWidth: '180px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            if (!isSaving) {
+              e.currentTarget.style.background = '#38a169';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#38a169';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
         >
           📥 Export Settings
         </button>
@@ -805,7 +882,9 @@ const SettingsPage = () => {
           <div className="advanced-item">
             <h4>Cache Management</h4>
             <p>Clear cached weather data</p>
-            <button className="advanced-action">Clear Cache</button>
+            <button className="advanced-action" onClick={clearCache}>
+              Clear Cache
+            </button>
           </div>
           
           <div className="advanced-item">
@@ -836,7 +915,7 @@ const SettingsPage = () => {
           </div>
           <div className="info-item">
             <span className="info-label">Data Provider</span>
-            <span className="info-value">WeatherAPI.com</span>
+            <span className="info-value">Open-Meteo API</span>
           </div>
           <div className="info-item">
             <span className="info-label">Support</span>

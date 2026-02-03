@@ -1416,3 +1416,344 @@ body,
 .theme-icon {
   transition: none !important;
 }
+
+/* =============================================
+   UNSAVED CHANGES INDICATOR
+   ============================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.unsaved-indicator {
+  color: #f6ad55;
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: pulse-indicator 2s ease-in-out infinite;
+}
+
+@keyframes pulse-indicator {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* =============================================
+   SAVE CHANGES BUTTON
+   ============================================= */
+
+.save-changes-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 180px;
+}
+
+.save-changes-btn .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   FORM HINT
+   ============================================= */
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted, #718096);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* =============================================
+   PREFERENCE NOTE
+   ============================================= */
+
+.preference-note {
+  font-size: 0.85rem;
+  color: var(--text-muted, #718096);
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: var(--notification-bg, rgba(102, 126, 234, 0.1));
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-color, #667eea);
+}
+
+/* =============================================
+   DARK MODE FIXES
+   ============================================= */
+
+html[data-theme="dark"] .unsaved-indicator,
+html.dark .unsaved-indicator {
+  color: #fbd38d;
+}
+
+html[data-theme="dark"] .form-hint,
+html.dark .form-hint {
+  color: #a0aec0;
+}
+
+html[data-theme="dark"] .preference-note,
+html.dark .preference-note {
+  background: rgba(102, 126, 234, 0.15);
+  color: #a0aec0;
+}
+
+/* =============================================
+   ACTION BUTTONS - COMPLETE FIX
+   ============================================= */
+
+/* Main container for action buttons */
+.settings-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  margin-top: 2rem !important;
+  padding: 1.5rem !important;
+  background: var(--bg-card, #ffffff) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Base action button styles */
+.settings-actions .action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 1rem 1.5rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  min-width: 180px !important;
+  border: 2px solid transparent !important;
+  text-decoration: none !important;
+}
+
+/* Primary button - Save Changes */
+.settings-actions .action-btn.primary-btn,
+.settings-actions .save-changes-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+.settings-actions .action-btn.primary-btn:hover,
+.settings-actions .save-changes-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5) !important;
+}
+
+.settings-actions .action-btn.primary-btn:disabled,
+.settings-actions .save-changes-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Secondary button - Reset to Defaults */
+.settings-actions .action-btn.secondary-btn {
+  background: transparent !important;
+  color: #f56565 !important;
+  border: 2px solid #f56565 !important;
+}
+
+.settings-actions .action-btn.secondary-btn:hover {
+  background: #f56565 !important;
+  color: #ffffff !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4) !important;
+}
+
+/* Export button */
+.settings-actions .action-btn.export-btn {
+  background: transparent !important;
+  color: #48bb78 !important;
+  border: 2px solid #48bb78 !important;
+}
+
+.settings-actions .action-btn.export-btn:hover {
+  background: #48bb78 !important;
+  color: #ffffff !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4) !important;
+}
+
+/* Spinner animation for saving state */
+.settings-actions .action-btn .spinner {
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-top-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: spin 0.8s linear infinite !important;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   DARK MODE FIXES FOR ACTION BUTTONS
+   ============================================= */
+
+html[data-theme="dark"] .settings-actions,
+html.dark .settings-actions,
+[data-theme="dark"] .settings-actions {
+  background: #1a1a2e !important;
+  border-color: #2d3748 !important;
+}
+
+html[data-theme="dark"] .settings-actions .action-btn.primary-btn,
+html[data-theme="dark"] .settings-actions .save-changes-btn,
+html.dark .settings-actions .action-btn.primary-btn,
+html.dark .settings-actions .save-changes-btn,
+[data-theme="dark"] .settings-actions .action-btn.primary-btn,
+[data-theme="dark"] .settings-actions .save-changes-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .settings-actions .action-btn.secondary-btn,
+html.dark .settings-actions .action-btn.secondary-btn,
+[data-theme="dark"] .settings-actions .action-btn.secondary-btn {
+  background: transparent !important;
+  color: #fc8181 !important;
+  border-color: #fc8181 !important;
+}
+
+html[data-theme="dark"] .settings-actions .action-btn.secondary-btn:hover,
+html.dark .settings-actions .action-btn.secondary-btn:hover,
+[data-theme="dark"] .settings-actions .action-btn.secondary-btn:hover {
+  background: #fc8181 !important;
+  color: #1a1a2e !important;
+}
+
+html[data-theme="dark"] .settings-actions .action-btn.export-btn,
+html.dark .settings-actions .action-btn.export-btn,
+[data-theme="dark"] .settings-actions .action-btn.export-btn {
+  background: transparent !important;
+  color: #68d391 !important;
+  border-color: #68d391 !important;
+}
+
+html[data-theme="dark"] .settings-actions .action-btn.export-btn:hover,
+html.dark .settings-actions .action-btn.export-btn:hover,
+[data-theme="dark"] .settings-actions .action-btn.export-btn:hover {
+  background: #68d391 !important;
+  color: #1a1a2e !important;
+}
+
+/* =============================================
+   HEADER ACTIONS - UNSAVED INDICATOR
+   ============================================= */
+
+.settings-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  flex-wrap: wrap !important;
+}
+
+.unsaved-indicator {
+  color: #ed8936 !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  padding: 0.5rem 1rem !important;
+  background: rgba(237, 137, 54, 0.1) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(237, 137, 54, 0.3) !important;
+  animation: pulse-indicator 2s ease-in-out infinite !important;
+}
+
+@keyframes pulse-indicator {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+html[data-theme="dark"] .unsaved-indicator,
+html.dark .unsaved-indicator,
+[data-theme="dark"] .unsaved-indicator {
+  color: #fbd38d !important;
+  background: rgba(251, 211, 141, 0.1) !important;
+  border-color: rgba(251, 211, 141, 0.3) !important;
+}
+
+/* =============================================
+   FORM HINT & PREFERENCE NOTE
+   ============================================= */
+
+.form-hint {
+  font-size: 0.85rem !important;
+  color: var(--text-muted, #718096) !important;
+  margin-top: 0.5rem !important;
+  font-style: italic !important;
+}
+
+.preference-note {
+  font-size: 0.85rem !important;
+  color: var(--text-muted, #718096) !important;
+  margin-top: 0.75rem !important;
+  padding: 0.5rem 0.75rem !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-radius: 6px !important;
+  border-left: 3px solid #667eea !important;
+}
+
+html[data-theme="dark"] .form-hint,
+html.dark .form-hint,
+[data-theme="dark"] .form-hint {
+  color: #a0aec0 !important;
+}
+
+html[data-theme="dark"] .preference-note,
+html.dark .preference-note,
+[data-theme="dark"] .preference-note {
+  background: rgba(102, 126, 234, 0.15) !important;
+  color: #a0aec0 !important;
+}
+
+/* =============================================
+   RESPONSIVE - STACK BUTTONS ON MOBILE
+   ============================================= */
+
+@media (max-width: 768px) {
+  .settings-actions {
+    flex-direction: column !important;
+  }
+  
+  .settings-actions .action-btn {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  .settings-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}

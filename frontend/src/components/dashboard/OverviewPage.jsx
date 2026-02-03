@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { overviewLogic } from '../../scripts/overviewPage';
+import { useSettings } from '../../context/settingsContext';
 import '../../styles/pages/OverviewPage.css';
 
 const OverviewPage = () => {
   const [state, setState] = useState(overviewLogic.initialState);
   const navigate = useNavigate();
+  
+  // Get conversion utilities from settings context
+  const { 
+    convertTemperature, 
+    getTempUnit, 
+    convertSpeed, 
+    getSpeedUnit,
+    settings 
+  } = useSettings();
 
   useEffect(() => {
     loadData();
@@ -54,7 +64,6 @@ const OverviewPage = () => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           alert(`Your location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-          // In real app, you would reverse geocode to get city name
         },
         (err) => alert('Unable to get your location: ' + err.message)
       );
@@ -89,6 +98,10 @@ const OverviewPage = () => {
       <WeatherSummary 
         weatherData={weatherData}
         onRefresh={handleRefresh}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+        convertSpeed={convertSpeed}
+        getSpeedUnit={getSpeedUnit}
       />
 
       {/* Hourly Forecast Section */}
@@ -98,10 +111,18 @@ const OverviewPage = () => {
         city={currentLocation}
         onHourSelect={handleHourSelect}
         onRefresh={handleRefresh}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+        convertSpeed={convertSpeed}
+        getSpeedUnit={getSpeedUnit}
       />
 
       {/* 5-Day Forecast */}
-      <FiveDayForecast forecastData={forecastData} />
+      <FiveDayForecast 
+        forecastData={forecastData}
+        convertTemperature={convertTemperature}
+        getTempUnit={getTempUnit}
+      />
 
       {/* Features Grid */}
       <FeaturesGrid 
@@ -139,8 +160,47 @@ const LocationSelector = ({ currentLocation, onLocationChange, onGPSClick }) => 
   </div>
 );
 
-const WeatherSummary = ({ weatherData, onRefresh }) => {
-  const metrics = overviewLogic.getWeatherMetrics(weatherData);
+const WeatherSummary = ({ 
+  weatherData, 
+  onRefresh, 
+  convertTemperature, 
+  getTempUnit,
+  convertSpeed,
+  getSpeedUnit 
+}) => {
+  const tempUnit = getTempUnit();
+  const speedUnit = getSpeedUnit();
+  
+  // Get metrics with converted values
+  const getConvertedMetrics = () => {
+    if (!weatherData) return {};
+    
+    return {
+      humidity: {
+        icon: '💧',
+        value: `${weatherData.humidity || '--'}%`,
+        label: 'Humidity'
+      },
+      wind: {
+        icon: '💨',
+        value: `${convertSpeed(weatherData.windSpeed, 'kmh')} ${speedUnit}`,
+        label: 'Wind Speed'
+      },
+      pressure: {
+        icon: '🌡️',
+        value: `${weatherData.pressure || '--'} hPa`,
+        label: 'Pressure'
+      },
+      uv: {
+        icon: '☀️',
+        value: weatherData.uvIndex || '--',
+        label: 'UV Index',
+        level: weatherData.uvLevel
+      }
+    };
+  };
+
+  const metrics = getConvertedMetrics();
 
   return (
     <div className="weather-summary">
@@ -151,7 +211,9 @@ const WeatherSummary = ({ weatherData, onRefresh }) => {
             🔄
           </button>
         </div>
-        <div className="temp">{Math.round(weatherData?.temperature)}°C</div>
+        <div className="temp">
+          {convertTemperature(weatherData?.temperature, 'celsius')}{tempUnit}
+        </div>
         <div className="condition">{weatherData?.condition}</div>
         <div className="location">
           {weatherData?.city}, {weatherData?.country}
@@ -174,7 +236,17 @@ const WeatherSummary = ({ weatherData, onRefresh }) => {
   );
 };
 
-const HourlyForecastSection = ({ hourlyData, selectedHour, city, onHourSelect, onRefresh }) => {
+const HourlyForecastSection = ({ 
+  hourlyData, 
+  selectedHour, 
+  city, 
+  onHourSelect, 
+  onRefresh,
+  convertTemperature,
+  getTempUnit,
+  convertSpeed,
+  getSpeedUnit
+}) => {
   const temperatureTrend = overviewLogic.calculateTemperatureTrend(hourlyData);
 
   return (
@@ -198,6 +270,8 @@ const HourlyForecastSection = ({ hourlyData, selectedHour, city, onHourSelect, o
               hour={hour}
               isSelected={selectedHour?.hour === hour.hour}
               onClick={() => onHourSelect(hour)}
+              convertTemperature={convertTemperature}
+              getTempUnit={getTempUnit}
             />
           ))}
         </div>
@@ -209,11 +283,23 @@ const HourlyForecastSection = ({ hourlyData, selectedHour, city, onHourSelect, o
       </div>
 
       {/* Selected Hour Details */}
-      {selectedHour && <HourDetails hour={selectedHour} />}
+      {selectedHour && (
+        <HourDetails 
+          hour={selectedHour}
+          convertTemperature={convertTemperature}
+          getTempUnit={getTempUnit}
+          convertSpeed={convertSpeed}
+          getSpeedUnit={getSpeedUnit}
+        />
+      )}
 
       {/* Temperature Chart */}
       {temperatureTrend && (
-        <TemperatureChart hourlyData={temperatureTrend.slice(0, 12)} />
+        <TemperatureChart 
+          hourlyData={temperatureTrend.slice(0, 12)}
+          convertTemperature={convertTemperature}
+          getTempUnit={getTempUnit}
+        />
       )}
 
       <div className="forecast-note">
@@ -226,100 +312,117 @@ const HourlyForecastSection = ({ hourlyData, selectedHour, city, onHourSelect, o
   );
 };
 
-const HourItem = ({ hour, isSelected, onClick }) => (
-  <div
-    className={`timeline-hour ${isSelected ? 'selected' : ''}`}
-    onClick={onClick}
-    title={`${hour.displayHour}: ${hour.temperature}°C, ${hour.condition}`}
-  >
-    <div className="hour-time">{hour.displayHour}</div>
-    <div className="hour-icon">{hour.icon}</div>
-    <div 
-      className="hour-temp"
-      style={{ color: overviewLogic.getTemperatureColor(hour.temperature) }}
+const HourItem = ({ hour, isSelected, onClick, convertTemperature, getTempUnit }) => {
+  const tempUnit = getTempUnit();
+  const convertedTemp = convertTemperature(hour.temperature, 'celsius');
+  
+  return (
+    <div
+      className={`timeline-hour ${isSelected ? 'selected' : ''}`}
+      onClick={onClick}
+      title={`${hour.displayHour}: ${convertedTemp}${tempUnit}, ${hour.condition}`}
     >
-      {hour.temperature}°
-    </div>
-    {hour.precipitation > 0 && (
-      <div className="precipitation-indicator">
-        <span className="raindrop">💧</span>
-        <span className="precipitation-value">{Math.round(hour.precipitation)}%</span>
+      <div className="hour-time">{hour.displayHour}</div>
+      <div className="hour-icon">{hour.icon}</div>
+      <div 
+        className="hour-temp"
+        style={{ color: overviewLogic.getTemperatureColor(hour.temperature) }}
+      >
+        {convertedTemp}°
       </div>
-    )}
-  </div>
-);
-
-const HourDetails = ({ hour }) => (
-  <div className="hour-details">
-    <div className="details-header">
-      <h4>{hour.displayHour} Details</h4>
-      {hour.hour === new Date().getHours() && (
-        <span className="current-badge">Current</span>
+      {hour.precipitation > 0 && (
+        <div className="precipitation-indicator">
+          <span className="raindrop">💧</span>
+          <span className="precipitation-value">{Math.round(hour.precipitation)}%</span>
+        </div>
       )}
     </div>
-    
-    <div className="details-grid">
-      {[
-        { key: 'temperature', icon: '🌡️', label: 'Temperature', value: `${hour.temperature}°C` },
-        { key: 'feelsLike', icon: '🤔', label: 'Feels Like', value: `${hour.feelsLike}°C` },
-        { key: 'humidity', icon: '💧', label: 'Humidity', value: `${hour.humidity}%` },
-        { key: 'windSpeed', icon: '💨', label: 'Wind Speed', value: `${hour.windSpeed} km/h` },
-        { key: 'precipitation', icon: '🌧️', label: 'Precipitation', value: `${hour.precipitation}%` },
-        { key: 'uvIndex', icon: '👁️', label: 'UV Index', value: hour.uvIndex }
-      ].map(item => (
-        <div key={item.key} className="detail-card">
-          <div className="detail-icon">{item.icon}</div>
-          <div className="detail-info">
-            <div className="detail-value">{item.value}</div>
-            <div className="detail-label">{item.label}</div>
+  );
+};
+
+const HourDetails = ({ hour, convertTemperature, getTempUnit, convertSpeed, getSpeedUnit }) => {
+  const tempUnit = getTempUnit();
+  const speedUnit = getSpeedUnit();
+  
+  const details = [
+    { key: 'temperature', icon: '🌡️', label: 'Temperature', value: `${convertTemperature(hour.temperature, 'celsius')}${tempUnit}` },
+    { key: 'feelsLike', icon: '🤔', label: 'Feels Like', value: `${convertTemperature(hour.feelsLike, 'celsius')}${tempUnit}` },
+    { key: 'humidity', icon: '💧', label: 'Humidity', value: `${hour.humidity}%` },
+    { key: 'windSpeed', icon: '💨', label: 'Wind Speed', value: `${convertSpeed(hour.windSpeed, 'kmh')} ${speedUnit}` },
+    { key: 'precipitation', icon: '🌧️', label: 'Precipitation', value: `${hour.precipitation}%` },
+    { key: 'uvIndex', icon: '👁️', label: 'UV Index', value: hour.uvIndex }
+  ];
+  
+  return (
+    <div className="hour-details">
+      <div className="details-header">
+        <h4>{hour.displayHour} Details</h4>
+        {hour.hour === new Date().getHours() && (
+          <span className="current-badge">Current</span>
+        )}
+      </div>
+      
+      <div className="details-grid">
+        {details.map(item => (
+          <div key={item.key} className="detail-card">
+            <div className="detail-icon">{item.icon}</div>
+            <div className="detail-info">
+              <div className="detail-value">{item.value}</div>
+              <div className="detail-label">{item.label}</div>
+            </div>
           </div>
+        ))}
+      </div>
+      
+      <div className="condition-summary">
+        <div className="condition-icon">{hour.icon}</div>
+        <div className="condition-info">
+          <h5>{hour.condition}</h5>
+          <p>Weather conditions at {hour.displayHour}</p>
         </div>
-      ))}
-    </div>
-    
-    <div className="condition-summary">
-      <div className="condition-icon">{hour.icon}</div>
-      <div className="condition-info">
-        <h5>{hour.condition}</h5>
-        <p>Weather conditions at {hour.displayHour}</p>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const TemperatureChart = ({ hourlyData }) => (
-  <div className="temperature-chart">
-    <h4>Temperature Trend</h4>
-    <div className="chart-container">
-      <div className="chart-line">
-        {hourlyData.map((hour, index) => (
-          <div key={index} className="chart-point">
-            <div 
-              className="point"
-              style={{
-                bottom: `${hour.chartHeight}%`,
-                backgroundColor: overviewLogic.getTemperatureColor(hour.temperature)
-              }}
-              title={`${hour.displayHour}: ${hour.temperature}°C`}
-            ></div>
-            <div className="point-label">{hour.displayHour}</div>
+const TemperatureChart = ({ hourlyData, convertTemperature, getTempUnit }) => {
+  const tempUnit = getTempUnit();
+  
+  return (
+    <div className="temperature-chart">
+      <h4>Temperature Trend</h4>
+      <div className="chart-container">
+        <div className="chart-line">
+          {hourlyData.map((hour, index) => (
+            <div key={index} className="chart-point">
+              <div 
+                className="point"
+                style={{
+                  bottom: `${hour.chartHeight}%`,
+                  backgroundColor: overviewLogic.getTemperatureColor(hour.temperature)
+                }}
+                title={`${hour.displayHour}: ${convertTemperature(hour.temperature, 'celsius')}${tempUnit}`}
+              ></div>
+              <div className="point-label">{hour.displayHour}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="chart-legend">
+        {['cold', 'cool', 'warm', 'hot'].map(type => (
+          <div key={type} className="legend-item">
+            <div className={`legend-color ${type}`}></div>
+            <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
           </div>
         ))}
       </div>
     </div>
-    <div className="chart-legend">
-      {['cold', 'cool', 'warm', 'hot'].map(type => (
-        <div key={type} className="legend-item">
-          <div className={`legend-color ${type}`}></div>
-          <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
-const FiveDayForecast = ({ forecastData }) => {
+const FiveDayForecast = ({ forecastData, convertTemperature, getTempUnit }) => {
   const forecast = overviewLogic.getFiveDayForecast(forecastData);
+  const tempUnit = getTempUnit();
   
   if (!forecast.length) return null;
 
@@ -331,7 +434,9 @@ const FiveDayForecast = ({ forecastData }) => {
           <div key={index} className="forecast-card">
             <div className="forecast-day">{day.day}</div>
             <div className="forecast-icon">{day.icon}</div>
-            <div className="forecast-temp">{day.temperature}°C</div>
+            <div className="forecast-temp">
+              {convertTemperature(day.temperature, 'celsius')}{tempUnit}
+            </div>
             <div className="forecast-condition">{day.condition}</div>
           </div>
         ))}
