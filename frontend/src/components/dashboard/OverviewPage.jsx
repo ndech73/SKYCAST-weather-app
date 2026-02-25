@@ -183,7 +183,7 @@ const WeatherSummary = ({
       },
       wind: {
         icon: '💨',
-        value: `${convertSpeed(weatherData.windSpeed, 'kmh')} ${speedUnit}`,
+        value: `${convertSpeed(weatherData.windSpeed, 'ms')} ${speedUnit}`,
         label: 'Wind Speed'
       },
       pressure: {
@@ -348,7 +348,7 @@ const HourDetails = ({ hour, convertTemperature, getTempUnit, convertSpeed, getS
     { key: 'temperature', icon: '🌡️', label: 'Temperature', value: `${convertTemperature(hour.temperature, 'celsius')}${tempUnit}` },
     { key: 'feelsLike', icon: '🤔', label: 'Feels Like', value: `${convertTemperature(hour.feelsLike, 'celsius')}${tempUnit}` },
     { key: 'humidity', icon: '💧', label: 'Humidity', value: `${hour.humidity}%` },
-    { key: 'windSpeed', icon: '💨', label: 'Wind Speed', value: `${convertSpeed(hour.windSpeed, 'kmh')} ${speedUnit}` },
+    { key: 'windSpeed', icon: '💨', label: 'Wind Speed', value: `${convertSpeed(hour.windSpeed, 'ms')} ${speedUnit}` },
     { key: 'precipitation', icon: '🌧️', label: 'Precipitation', value: `${hour.precipitation}%` },
     { key: 'uvIndex', icon: '👁️', label: 'UV Index', value: hour.uvIndex }
   ];

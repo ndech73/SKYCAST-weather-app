@@ -161,6 +161,8 @@ const geocodeCity = async (city) => {
 
 const formatCurrentWeather = (data) => {
   if (data.location && data.coord) {
+    // FIX: Handle wind as a plain number (m/s) from backend
+    const windSpeedValue = typeof data.wind === 'number' ? data.wind : (data.wind?.speed || 0);
     return {
       name: data.location.name || 'Unknown City',
       city: data.location.name || 'Unknown City',
@@ -175,7 +177,7 @@ const formatCurrentWeather = (data) => {
         humidity: data.humidity,
         pressure: 1013
       },
-      wind: { speed: data.wind },
+      wind: { speed: windSpeedValue },
       clouds: { all: data.cloud },
       weather: [{
         main: data.cloud > 50 ? 'Clouds' :  'Clear',
@@ -191,7 +193,7 @@ const formatCurrentWeather = (data) => {
       condition: data.cloud > 50 ? 'Cloudy' : 'Clear',
       humidity: data.humidity,
       pressure: 1013,
-      windSpeed: data.wind,
+      windSpeed: windSpeedValue,
       cloudCover: data.cloud,
       precipitation: data.snow || 0
     };
@@ -204,8 +206,9 @@ const formatCurrentWeather = (data) => {
     condition: data.weather?.[0]?.description || data.condition || data.current?.condition?.text || 'Unknown',
     humidity:  data.main?.humidity || data.humidity || data.current?.humidity,
     pressure: data.main?.pressure || data.pressure || data.current?.pressure,
-    windSpeed: data.wind?.speed || data.windSpeed || data.current?.wind_kph || 0,
-    windDirection: data.wind?.deg || data.windDirection || data.current?.wind_degree,
+    // FIX: Handle wind as a plain number (m/s) or as an object with .speed
+    windSpeed: (typeof data.wind === 'number' ? data.wind : data.wind?.speed) || data.windSpeed || data.current?.wind_kph || 0,
+    windDirection: (typeof data.wind === 'object' ? data.wind?.deg : undefined) || data.windDirection || data.current?.wind_degree,
     cloudCover: data.clouds?.all || data.cloudCover || data.current?.cloud,
     visibility: data.visibility || data.current?.vis_km,
     sunrise: data.sys?.sunrise || data.astro?.sunrise,

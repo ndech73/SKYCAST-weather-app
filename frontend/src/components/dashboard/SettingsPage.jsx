@@ -526,31 +526,6 @@ const SettingsPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Theme & Appearance */}
-        <div className="settings-section">
-          <h3>🎨 Theme & Appearance</h3>
-          <div className="theme-selector">
-            {[
-              { id: 'light', name: 'Light', icon: '☀️', desc: 'Light mode' },
-              { id: 'dark', name: 'Dark', icon: '🌙', desc: 'Dark mode' },
-              { id: 'auto', name: 'Auto', icon: '🌓', desc: 'Follow system theme' }
-            ].map(theme => (
-              <div
-                key={theme.id}
-                className={`theme-option ${settings.theme === theme.id ? 'selected' : ''}`}
-                onClick={() => handleSettingChange('theme', theme.id)}
-              >
-                <div className="theme-icon">{theme.icon}</div>
-                <div className="theme-info">
-                  <h4>{theme.name}</h4>
-                  <p>{theme.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Language */}
         <div className="settings-section">
           <h3>🌐 Language</h3>
