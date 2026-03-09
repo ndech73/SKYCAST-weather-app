@@ -159,10 +159,46 @@ const geocodeCity = async (city) => {
   }
 };
 
+/**
+ * Helper function to round numbers to 1 decimal place
+ * @param {number} value - The value to round
+ * @returns {number} Rounded value or 0 if invalid
+ */
+const roundToOneDecimal = (value) => {
+  if (typeof value !== 'number' || isNaN(value)) return 0;
+  return Math.round(value * 10) / 10;
+};
+
+/**
+ * Helper function to safely extract and round wind speed from various data formats
+ * @param {Object|number} data - Weather data object or direct wind value
+ * @returns {number} Rounded wind speed value
+ */
+const extractWindSpeed = (data) => {
+  let windSpeed = 0;
+  
+  if (typeof data === 'number') {
+    windSpeed = data;
+  } else if (typeof data?.wind === 'number') {
+    windSpeed = data.wind;
+  } else if (typeof data?.wind?.speed === 'number') {
+    windSpeed = data.wind.speed;
+  } else if (typeof data?.windSpeed === 'number') {
+    windSpeed = data.windSpeed;
+  } else if (typeof data?.current?.wind_kph === 'number') {
+    windSpeed = data.current.wind_kph;
+  } else if (typeof data?.wind_speed === 'number') {
+    windSpeed = data.wind_speed;
+  }
+  
+  return roundToOneDecimal(windSpeed);
+};
+
 const formatCurrentWeather = (data) => {
   if (data.location && data.coord) {
-    // FIX: Handle wind as a plain number (m/s) from backend
-    const windSpeedValue = typeof data.wind === 'number' ? data.wind : (data.wind?.speed || 0);
+    // Handle wind as a plain number (m/s) from backend - WITH ROUNDING FIX
+    const windSpeedValue = extractWindSpeed(data);
+    
     return {
       name: data.location.name || 'Unknown City',
       city: data.location.name || 'Unknown City',
@@ -170,53 +206,66 @@ const formatCurrentWeather = (data) => {
       sys: { country: data.location.country },
       coord: data.coord,
       main: {
-        temp: data.temp,
-        feels_like: data.temp,
-        temp_min: data.temp,
-        temp_max: data.temp,
-        humidity: data.humidity,
-        pressure: 1013
+        temp: roundToOneDecimal(data.temp),
+        feels_like: roundToOneDecimal(data.temp),
+        temp_min: roundToOneDecimal(data.temp),
+        temp_max: roundToOneDecimal(data.temp),
+        humidity: Math.round(data.humidity || 0),
+        pressure: Math.round(data.pressure || 1013)
       },
       wind: { speed: windSpeedValue },
-      clouds: { all: data.cloud },
+      clouds: { all: Math.round(data.cloud || 0) },
       weather: [{
-        main: data.cloud > 50 ? 'Clouds' :  'Clear',
+        main: data.cloud > 50 ? 'Clouds' : 'Clear',
         description: data.cloud > 50 ? 'cloudy' : 'clear sky',
         icon: data.cloud > 50 ? '04d' : '01d'
       }],
       dt: Math.floor(Date.now() / 1000),
       aqi: data.aqi,
       aqi_label: data.aqi_label,
-      snow: data.snow,
-      temperature: data.temp,
-      feelsLike: data.temp,
+      snow: roundToOneDecimal(data.snow || 0),
+      // Formatted fields for direct use in components
+      temperature: roundToOneDecimal(data.temp),
+      feelsLike: roundToOneDecimal(data.temp),
       condition: data.cloud > 50 ? 'Cloudy' : 'Clear',
-      humidity: data.humidity,
-      pressure: 1013,
-      windSpeed: windSpeedValue,
-      cloudCover: data.cloud,
-      precipitation: data.snow || 0
+      humidity: Math.round(data.humidity || 0),
+      pressure: Math.round(data.pressure || 1013),
+      windSpeed: windSpeedValue, // Already rounded by extractWindSpeed
+      wind_speed: windSpeedValue, // Alternative key for mobile components
+      cloudCover: Math.round(data.cloud || 0),
+      precipitation: roundToOneDecimal(data.snow || 0)
     };
   }
+  
+  // Fallback format for other API response structures
+  const rawWindSpeed = (typeof data.wind === 'number' ? data.wind : data.wind?.speed) 
+    || data.windSpeed 
+    || data.wind_speed
+    || data.current?.wind_kph 
+    || 0;
+  
+  const windSpeedRounded = roundToOneDecimal(rawWindSpeed);
+  
   return {
     city: data.name || data.city || data.location?.name || 'Unknown City',
     country: data.sys?.country || data.country || data.location?.country || 'Unknown',
-    temperature: data.main?.temp || data.temperature || data.current?.temp || 20,
-    feelsLike: data.main?.feels_like || data.feelsLike || data.current?.feels_like,
+    temperature: roundToOneDecimal(data.main?.temp || data.temperature || data.current?.temp || 20),
+    feelsLike: roundToOneDecimal(data.main?.feels_like || data.feelsLike || data.current?.feels_like || data.temperature || 20),
     condition: data.weather?.[0]?.description || data.condition || data.current?.condition?.text || 'Unknown',
-    humidity:  data.main?.humidity || data.humidity || data.current?.humidity,
-    pressure: data.main?.pressure || data.pressure || data.current?.pressure,
-    // FIX: Handle wind as a plain number (m/s) or as an object with .speed
-    windSpeed: (typeof data.wind === 'number' ? data.wind : data.wind?.speed) || data.windSpeed || data.current?.wind_kph || 0,
+    humidity: Math.round(data.main?.humidity || data.humidity || data.current?.humidity || 0),
+    pressure: Math.round(data.main?.pressure || data.pressure || data.current?.pressure || 1013),
+    // FIXED: Wind speed now properly rounded
+    windSpeed: windSpeedRounded,
+    wind_speed: windSpeedRounded, // Alternative key for mobile components
     windDirection: (typeof data.wind === 'object' ? data.wind?.deg : undefined) || data.windDirection || data.current?.wind_degree,
-    cloudCover: data.clouds?.all || data.cloudCover || data.current?.cloud,
-    visibility: data.visibility || data.current?.vis_km,
+    cloudCover: Math.round(data.clouds?.all || data.cloudCover || data.current?.cloud || 0),
+    visibility: roundToOneDecimal(data.visibility || data.current?.vis_km || 10),
     sunrise: data.sys?.sunrise || data.astro?.sunrise,
     sunset: data.sys?.sunset || data.astro?.sunset,
     timestamp: data.dt || data.last_updated_epoch || Date.now(),
     icon: data.weather?.[0]?.icon || data.current?.condition?.icon,
-    uvIndex: data.current?.uv || data.uvi,
-    precipitation: data.rain?.['1h'] || data.snow?.['1h'] || data.current?.precip_mm || 0
+    uvIndex: roundToOneDecimal(data.current?.uv || data.uvi || 0),
+    precipitation: roundToOneDecimal(data.rain?.['1h'] || data.snow?.['1h'] || data.current?.precip_mm || 0)
   };
 };
 
@@ -227,13 +276,13 @@ const formatForecast = (data) => {
       country: data.location?.country || data.country,
       forecast: data.forecast.forecastday.map(day => ({
         date: day.date,
-        temperature: day.day?.avgtemp_c || day.day?.avgtemp_f,
-        maxTemp: day.day?.maxtemp_c || day.day?.maxtemp_f,
-        minTemp: day.day?.mintemp_c || day.day?.mintemp_f,
+        temperature: roundToOneDecimal(day.day?.avgtemp_c || day.day?.avgtemp_f || 0),
+        maxTemp: roundToOneDecimal(day.day?.maxtemp_c || day.day?.maxtemp_f || 0),
+        minTemp: roundToOneDecimal(day.day?.mintemp_c || day.day?.mintemp_f || 0),
         condition: day.day?.condition?.text,
-        humidity: day.day?.avghumidity,
-        precipitation: day.day?.totalprecip_mm,
-        uvIndex: day.day?.uv,
+        humidity: Math.round(day.day?.avghumidity || 0),
+        precipitation: roundToOneDecimal(day.day?.totalprecip_mm || 0),
+        uvIndex: roundToOneDecimal(day.day?.uv || 0),
         icon: day.day?.condition?.icon
       }))
     };
@@ -243,13 +292,15 @@ const formatForecast = (data) => {
       country: data.city?.country,
       forecast: data.list.map(item => ({
         timestamp: item.dt,
-        temperature: item.main?.temp,
-        feelsLike: item.main?.feels_like,
-        condition:  item.weather?.[0]?.description,
-        humidity: item.main?.humidity,
-        pressure: item.main?.pressure,
-        windSpeed: item.wind?.speed,
-        precipitation: item.pop || item.rain?.['3h'] || 0,
+        temperature: roundToOneDecimal(item.main?.temp || 0),
+        feelsLike: roundToOneDecimal(item.main?.feels_like || 0),
+        condition: item.weather?.[0]?.description,
+        humidity: Math.round(item.main?.humidity || 0),
+        pressure: Math.round(item.main?.pressure || 1013),
+        // FIXED: Wind speed in forecast also rounded
+        windSpeed: roundToOneDecimal(item.wind?.speed || 0),
+        wind_speed: roundToOneDecimal(item.wind?.speed || 0),
+        precipitation: roundToOneDecimal(item.pop * 100 || item.rain?.['3h'] || 0),
         icon: item.weather?.[0]?.icon
       }))
     };
@@ -258,16 +309,22 @@ const formatForecast = (data) => {
 };
 
 const getMockCurrentWeather = (city) => {
+  // Generate random but rounded values for mock data
+  const temp = roundToOneDecimal(20 + Math.random() * 15);
+  const windSpeed = roundToOneDecimal(5 + Math.random() * 15);
+  
   return {
     city: city,
     country: 'Unknown',
-    temperature: 20 + Math.random() * 15,
+    temperature: temp,
+    feelsLike: temp,
     condition: ['Sunny', 'Cloudy', 'Partly Cloudy', 'Rainy'][Math.floor(Math.random() * 4)],
-    humidity: 40 + Math.random() * 40,
-    pressure: 1000 + Math.random() * 30,
-    windSpeed: 5 + Math.random() * 15,
-    windDirection: Math.random() * 360,
-    cloudCover: Math.random() * 100,
+    humidity: Math.round(40 + Math.random() * 40),
+    pressure: Math.round(1000 + Math.random() * 30),
+    windSpeed: windSpeed, // Now rounded
+    wind_speed: windSpeed, // Alternative key for mobile
+    windDirection: Math.round(Math.random() * 360),
+    cloudCover: Math.round(Math.random() * 100),
     uvIndex: Math.floor(Math.random() * 11)
   };
 };
@@ -279,10 +336,11 @@ const getMockForecast = (city) => {
     forecast: Array.from({ length: 5 }, (_, i) => ({
       day: new Date(Date.now() + i * 86400000).toLocaleDateString('en-US', { weekday: 'short' }),
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
-      temperature: 20 + Math.random() * 10,
+      temperature: roundToOneDecimal(20 + Math.random() * 10),
       condition: conditions[Math.floor(Math.random() * conditions.length)],
-      humidity: 50 + Math.random() * 30,
-      precipitation: Math.random() * 20
+      humidity: Math.round(50 + Math.random() * 30),
+      precipitation: roundToOneDecimal(Math.random() * 20),
+      windSpeed: roundToOneDecimal(5 + Math.random() * 15) // Added windSpeed to forecast mock
     }))
   };
 };
@@ -290,10 +348,10 @@ const getMockForecast = (city) => {
 const getMockHistoricalData = (city, days) => {
   return Array.from({ length: days }, (_, i) => ({
     date: new Date(Date.now() - (days - i) * 86400000).toISOString().split('T')[0],
-    temperature: 20 + Math.random() * 10,
-    humidity: 50 + Math.random() * 30,
-    rainfall: Math.random() * 15,
-    windSpeed: 5 + Math.random() * 15
+    temperature: roundToOneDecimal(20 + Math.random() * 10),
+    humidity: Math.round(50 + Math.random() * 30),
+    rainfall: roundToOneDecimal(Math.random() * 15),
+    windSpeed: roundToOneDecimal(5 + Math.random() * 15) // Now rounded
   }));
 };
 
@@ -301,7 +359,6 @@ export const weatherAPI = {
   getWeatherByCoords: async (lat, lon) => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      // 🚨 FIX: NO space before 'lat'
       const url = `${baseUrl}/api/weather?lat=${lat}&lon=${lon}`;
       console.log('Fetching weather by coords:', { lat, lon, url });
       const response = await fetchWithRetry(url);
@@ -312,6 +369,7 @@ export const weatherAPI = {
       throw error;
     }
   },
+  
   getCurrentWeather: async (city) => {
     try {
       const validCity = validateInput(city);
@@ -327,6 +385,7 @@ export const weatherAPI = {
       return getMockCurrentWeather(city);
     }
   },
+  
   getForecast: async (city) => {
     try {
       const validCity = validateInput(city);
@@ -342,6 +401,7 @@ export const weatherAPI = {
       return getMockForecast(city);
     }
   },
+  
   getHistoricalWeather: async (city, days = 7) => {
     try {
       const validCity = validateInput(city);
@@ -356,6 +416,7 @@ export const weatherAPI = {
       return getMockHistoricalData(city, days);
     }
   },
+  
   getMultipleLocationsWeather: async (cities) => {
     try {
       const promises = cities.map(city => weatherAPI.getCurrentWeather(city));
@@ -365,6 +426,7 @@ export const weatherAPI = {
       return cities.map(city => getMockCurrentWeather(city));
     }
   },
+  
   searchCities: async (query) => {
     try {
       const validQuery = validateInput(query, 50);
@@ -392,6 +454,7 @@ export const weatherAPI = {
       return [];
     }
   },
+  
   healthCheck: async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -402,12 +465,18 @@ export const weatherAPI = {
       return false;
     }
   },
+  
+  // Exported helper functions
   geocodeCity,
   formatCurrentWeather,
   formatForecast,
   getMockCurrentWeather,
   getMockForecast,
-  getMockHistoricalData
+  getMockHistoricalData,
+  
+  // NEW: Export helper functions for use in components
+  roundToOneDecimal,
+  extractWindSpeed
 };
 
 export { validateInput, sanitizeError };

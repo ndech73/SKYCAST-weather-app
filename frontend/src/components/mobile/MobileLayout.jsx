@@ -15,6 +15,9 @@ import {
   IoSearchOutline
 } from 'react-icons/io5';
 import { WiDaySunny } from 'react-icons/wi';
+import MobileNotificationToast from './MobileNotificationToast';
+import { notify } from '../../events/notificationEvents';
+import { weatherAPI } from '../../scripts/weatherAPI';
 import '../../styles/pages/mobile-redesign.css';
 
 const MobileLayout = ({ children }) => {
@@ -44,8 +47,29 @@ const MobileLayout = ({ children }) => {
     }
   };
 
+  // 🔔 Notification bell — fetch weather and show in-app toast
+  const handleNotificationClick = async () => {
+    try {
+      // Use user location later; for now a quick sample
+      const weatherData = await weatherAPI.getCurrentWeather('Nairobi');
+      const city = weatherData.city || weatherData.name || 'Your location';
+      const temp = Math.round(weatherData.temperature);
+      const condition = weatherData.condition || 'Clear';
+
+      notify.info(
+        `${temp}°C — ${condition}\n💧 ${weatherData.humidity || 0}% humidity | 💨 ${weatherData.windSpeed || 0} m/s wind`,
+        `🌤️ Weather in ${city}`
+      );
+    } catch (error) {
+      notify.warning('Unable to fetch latest weather. Check your connection.', '⚠️ Weather Update');
+    }
+  };
+
   return (
     <div className="mobile-app-container">
+      {/* In-App Notification Toasts */}
+      <MobileNotificationToast />
+
       {/* Top Header */}
       <header className="mobile-header">
         <div className="mobile-header-content">
@@ -54,7 +78,11 @@ const MobileLayout = ({ children }) => {
             <span className="mobile-logo-text">SkyCast</span>
           </div>
           <div className="mobile-header-actions">
-            <button className="mobile-icon-btn" aria-label="Notifications">
+            <button 
+              className="mobile-icon-btn" 
+              aria-label="Notifications"
+              onClick={handleNotificationClick}
+            >
               <IoNotificationsOutline />
             </button>
             <button className="mobile-icon-btn" onClick={() => handleNavigation('settings')} aria-label="Settings">

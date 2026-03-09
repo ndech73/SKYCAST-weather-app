@@ -1,6 +1,7 @@
 /**
  * Weather Notification Manager
  * Handles browser notifications for weather updates and alerts
+ * Enhanced with comprehensive debugging for mobile devices
  */
 
 class NotificationManager {
@@ -36,8 +37,331 @@ class NotificationManager {
    * @returns {boolean}
    */
   isEnabled() {
+    // Always refresh permission before checking
+    this.refreshPermission();
     return 'Notification' in window && this.permission === 'granted';
   }
+
+  /**
+   * Refresh the permission state from the browser
+   * @returns {string} Current permission status
+   */
+  refreshPermission() {
+    if ('Notification' in window) {
+      this.permission = Notification.permission;
+    }
+    return this.permission;
+  }
+
+  // ============================================
+  // DEBUGGING METHODS - START
+  // ============================================
+
+  /**
+   * DEBUG: Get comprehensive notification status
+   * @returns {Object} Debug information
+   */
+  getDebugInfo() {
+    // Always get fresh permission state
+    const currentPermission = 'Notification' in window ? Notification.permission : 'not-supported';
+    
+    const debugInfo = {
+      // Area 1: Permission State
+      storedPermission: this.permission,
+      currentPermission: currentPermission,
+      permissionMismatch: this.permission !== currentPermission,
+      
+      // Area 2: Browser Support
+      notificationAPIExists: 'Notification' in window,
+      notificationConstructor: typeof Notification,
+      
+      // Area 3: HTTPS Check
+      isSecureContext: window.isSecureContext,
+      protocol: window.location.protocol,
+      hostname: window.location.hostname,
+      
+      // Area 4: Platform Detection
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+      isAndroid: /Android/.test(navigator.userAgent),
+      isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+      
+      // Current State
+      isEnabled: 'Notification' in window && this.permission === 'granted',
+      hasActiveInterval: this.intervalId !== null,
+      hasActiveMonitor: this.changeMonitorId !== null,
+      
+      // Timestamp
+      checkedAt: new Date().toISOString()
+    };
+    
+    console.log('🔍 Notification Debug Info:', debugInfo);
+    return debugInfo;
+  }
+
+  /**
+   * Check detailed browser support for notifications
+   * @returns {Object} Support details
+   */
+  checkBrowserSupport() {
+    const support = {
+      hasNotificationAPI: 'Notification' in window,
+      hasServiceWorker: 'serviceWorker' in navigator,
+      hasPushManager: 'PushManager' in window,
+      hasPermissionsAPI: 'permissions' in navigator,
+      
+      // Detailed checks
+      canRequestPermission: false,
+      canCreateNotification: false,
+      
+      // Error messages
+      errors: []
+    };
+    
+    // Check if we can request permission
+    if (support.hasNotificationAPI) {
+      try {
+        support.canRequestPermission = typeof Notification.requestPermission === 'function';
+      } catch (e) {
+        support.errors.push(`requestPermission check failed: ${e.message}`);
+      }
+      
+      // Check if we can create a notification (when permission is granted)
+      if (this.permission === 'granted') {
+        try {
+          const testNotification = new Notification('Test', { silent: true });
+          testNotification.close();
+          support.canCreateNotification = true;
+        } catch (e) {
+          support.errors.push(`Notification creation failed: ${e.message}`);
+          support.canCreateNotification = false;
+        }
+      }
+    } else {
+      support.errors.push('Notification API not available in window');
+    }
+    
+    console.log('🌐 Browser Support:', support);
+    return support;
+  }
+
+  /**
+   * Check if the current context supports notifications (HTTPS/localhost)
+   * @returns {Object} Security context details
+   */
+  checkSecureContext() {
+    const context = {
+      isSecureContext: window.isSecureContext,
+      protocol: window.location.protocol,
+      hostname: window.location.hostname,
+      isLocalhost: ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname),
+      canUseNotifications: false,
+      reason: ''
+    };
+    
+    if (context.isSecureContext) {
+      context.canUseNotifications = true;
+      context.reason = 'Secure context (HTTPS or localhost)';
+    } else if (context.protocol === 'https:') {
+      context.canUseNotifications = true;
+      context.reason = 'HTTPS protocol';
+    } else if (context.isLocalhost) {
+      context.canUseNotifications = true;
+      context.reason = 'Localhost exception';
+    } else {
+      context.canUseNotifications = false;
+      context.reason = 'NOT SECURE: Notifications require HTTPS. Current protocol: ' + context.protocol;
+    }
+    
+    console.log('🔒 Security Context:', context);
+    return context;
+  }
+
+  /**
+   * Check iOS-specific limitations
+   * @returns {Object} iOS support details
+   */
+  checkiOSSupport() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true;
+    
+    // Try to detect iOS version
+    let iosVersion = null;
+    const match = navigator.userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);
+    if (match) {
+      iosVersion = parseFloat(`${match[1]}.${match[2]}`);
+    }
+    
+    const iosSupport = {
+      isIOS,
+      isSafari,
+      isStandalone,
+      iosVersion,
+      supportsNotifications: false,
+      reason: '',
+      instructions: []
+    };
+    
+    if (!isIOS) {
+      iosSupport.supportsNotifications = true;
+      iosSupport.reason = 'Not iOS - standard notification support';
+      return iosSupport;
+    }
+    
+    // iOS-specific checks
+    if (iosVersion && iosVersion < 16.4) {
+      iosSupport.reason = `iOS ${iosVersion} does not support web notifications. Requires iOS 16.4+`;
+      iosSupport.instructions = [
+        '1. Update your iOS to version 16.4 or later',
+        '2. Add this app to your home screen',
+        '3. Open the app from your home screen'
+      ];
+    } else if (!isStandalone) {
+      iosSupport.reason = 'iOS requires app to be added to home screen for notifications';
+      iosSupport.instructions = [
+        '1. Tap the Share button (📤) at the bottom of Safari',
+        '2. Scroll down and tap "Add to Home Screen"',
+        '3. Tap "Add" to confirm',
+        '4. Open SKYCAST from your home screen',
+        '5. Then enable notifications in settings'
+      ];
+    } else {
+      iosSupport.supportsNotifications = true;
+      iosSupport.reason = 'iOS 16.4+ in standalone mode - notifications should work';
+    }
+    
+    console.log('📱 iOS Support:', iosSupport);
+    return iosSupport;
+  }
+
+  /**
+   * Run complete notification diagnostics
+   * Call this from browser console: notificationManager.runDiagnostics()
+   * @returns {Promise<Object>} Complete diagnostic report
+   */
+  async runDiagnostics() {
+    console.log('🔬 Starting Notification Diagnostics...\n');
+    
+    const report = {
+      timestamp: new Date().toISOString(),
+      overallStatus: 'unknown',
+      checks: {}
+    };
+    
+    // 1. Permission State
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📋 CHECK 1: Permission State');
+    this.refreshPermission();
+    report.checks.permission = {
+      status: this.permission,
+      isGranted: this.permission === 'granted',
+      isDenied: this.permission === 'denied',
+      isDefault: this.permission === 'default'
+    };
+    console.log(`   Status: ${this.permission}`);
+    console.log(`   ✅ Granted: ${report.checks.permission.isGranted}`);
+    
+    // 2. Browser Support
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🌐 CHECK 2: Browser Support');
+    report.checks.browserSupport = this.checkBrowserSupport();
+    console.log(`   Notification API: ${report.checks.browserSupport.hasNotificationAPI ? '✅' : '❌'}`);
+    console.log(`   Service Worker: ${report.checks.browserSupport.hasServiceWorker ? '✅' : '❌'}`);
+    
+    // 3. HTTPS/Secure Context
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔒 CHECK 3: HTTPS/Secure Context');
+    report.checks.secureContext = this.checkSecureContext();
+    console.log(`   Secure: ${report.checks.secureContext.isSecureContext ? '✅' : '❌'}`);
+    console.log(`   Protocol: ${report.checks.secureContext.protocol}`);
+    console.log(`   Can Use: ${report.checks.secureContext.canUseNotifications ? '✅' : '❌'}`);
+    
+    // 4. iOS Limitations
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📱 CHECK 4: iOS/Mobile Limitations');
+    report.checks.iosSupport = this.checkiOSSupport();
+    if (report.checks.iosSupport.isIOS) {
+      console.log(`   iOS Version: ${report.checks.iosSupport.iosVersion || 'Unknown'}`);
+      console.log(`   Standalone Mode: ${report.checks.iosSupport.isStandalone ? '✅' : '❌'}`);
+      console.log(`   Supports Notifications: ${report.checks.iosSupport.supportsNotifications ? '✅' : '❌'}`);
+      if (report.checks.iosSupport.instructions.length > 0) {
+        console.log(`   Instructions:`);
+        report.checks.iosSupport.instructions.forEach(i => console.log(`     ${i}`));
+      }
+    } else {
+      console.log('   Not iOS device');
+    }
+    
+    // 5. Test Notification
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🧪 CHECK 5: Test Notification');
+    report.checks.testNotification = { attempted: false, success: false, error: null };
+    
+    if (this.isEnabled()) {
+      try {
+        report.checks.testNotification.attempted = true;
+        const testNotif = new Notification('🧪 SKYCAST Test', {
+          body: 'If you see this, notifications work!',
+          icon: '🌤️',
+          tag: 'diagnostic-test',
+          requireInteraction: false
+        });
+        
+        setTimeout(() => testNotif.close(), 5000);
+        report.checks.testNotification.success = true;
+        console.log('   ✅ Test notification sent successfully!');
+      } catch (error) {
+        report.checks.testNotification.error = error.message;
+        console.log(`   ❌ Test notification failed: ${error.message}`);
+      }
+    } else {
+      console.log('   ⏭️ Skipped - notifications not enabled');
+    }
+    
+    // Overall Status
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📊 OVERALL STATUS');
+    
+    const issues = [];
+    
+    if (!report.checks.permission.isGranted) {
+      issues.push('Permission not granted');
+    }
+    if (!report.checks.browserSupport.hasNotificationAPI) {
+      issues.push('Notification API not supported');
+    }
+    if (!report.checks.secureContext.canUseNotifications) {
+      issues.push('Not in secure context (HTTPS required)');
+    }
+    if (report.checks.iosSupport.isIOS && !report.checks.iosSupport.supportsNotifications) {
+      issues.push('iOS limitation: ' + report.checks.iosSupport.reason);
+    }
+    
+    if (issues.length === 0) {
+      report.overallStatus = 'WORKING';
+      console.log('   ✅ All checks passed! Notifications should work.');
+    } else {
+      report.overallStatus = 'ISSUES_FOUND';
+      console.log('   ❌ Issues found:');
+      issues.forEach(issue => console.log(`      • ${issue}`));
+    }
+    
+    report.issues = issues;
+    
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📝 Full report available in return value');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    
+    return report;
+  }
+
+  // ============================================
+  // DEBUGGING METHODS - END
+  // ============================================
 
   /**
    * Normalize weather data from various sources to a consistent format
@@ -159,11 +483,25 @@ class NotificationManager {
    * Send a weather notification
    * @param {Object} rawWeatherData - Weather data object from API
    * @param {string} type - Notification type: 'update', 'change', or 'test'
+   * @returns {boolean} Whether the notification was sent successfully
    */
   sendNotification(rawWeatherData, type = 'update') {
+    // Refresh permission before sending
+    this.refreshPermission();
+    
     if (!this.isEnabled()) {
       console.warn('Notifications not enabled');
-      return;
+      
+      // Log detailed reason for debugging
+      const debugInfo = this.getDebugInfo();
+      if (debugInfo.isIOS && !debugInfo.isStandalone) {
+        console.warn('📱 iOS detected: App must be added to home screen for notifications');
+      }
+      if (!debugInfo.isSecureContext) {
+        console.warn('🔒 Not in secure context: HTTPS required for notifications');
+      }
+      
+      return false;
     }
 
     // Normalize the weather data first
@@ -171,7 +509,7 @@ class NotificationManager {
     
     if (!weatherData) {
       console.error('Invalid weather data for notification');
-      return;
+      return false;
     }
 
     const { city } = weatherData;
@@ -209,9 +547,17 @@ class NotificationManager {
       setTimeout(() => notification.close(), 10000);
       
       console.log(`✅ Notification sent: ${type} for ${city}`);
+      return true;
       
     } catch (error) {
       console.error('Error sending notification:', error);
+      
+      // Provide more context on the error
+      if (error.name === 'TypeError') {
+        console.error('💡 This may be a browser compatibility issue. Run runDiagnostics() for details.');
+      }
+      
+      return false;
     }
   }
 
@@ -289,8 +635,19 @@ class NotificationManager {
   startPeriodicNotifications(fetchWeatherFn, intervalMinutes = 60) {
     this.stopPeriodicNotifications(); // Clear any existing interval
 
+    // Check if notifications can work before starting
+    const iosCheck = this.checkiOSSupport();
+    if (iosCheck.isIOS && !iosCheck.supportsNotifications) {
+      console.warn('📱 Cannot start periodic notifications:', iosCheck.reason);
+      console.warn('Instructions:', iosCheck.instructions.join(' → '));
+      return false;
+    }
+
     const sendUpdate = async () => {
       try {
+        // Refresh permission before each send (in case it changed)
+        this.refreshPermission();
+        
         const weatherData = await fetchWeatherFn();
         if (weatherData) {
           this.sendNotification(weatherData, 'update');
@@ -305,6 +662,7 @@ class NotificationManager {
     this.intervalId = setInterval(sendUpdate, intervalMinutes * 60 * 1000);
     
     console.log(`📢 Periodic notifications started (every ${intervalMinutes} minutes)`);
+    return true;
   }
 
   /**
@@ -326,8 +684,18 @@ class NotificationManager {
   startChangeMonitoring(fetchWeatherFn, checkIntervalMinutes = 15) {
     this.stopChangeMonitoring(); // Clear any existing monitor
 
+    // Check if notifications can work before starting
+    const iosCheck = this.checkiOSSupport();
+    if (iosCheck.isIOS && !iosCheck.supportsNotifications) {
+      console.warn('📱 Cannot start change monitoring:', iosCheck.reason);
+      return false;
+    }
+
     const checkForChanges = async () => {
       try {
+        // Refresh permission before each check
+        this.refreshPermission();
+        
         const rawWeatherData = await fetchWeatherFn();
         const weatherData = this.normalizeWeatherData(rawWeatherData);
         
@@ -351,6 +719,7 @@ class NotificationManager {
     this.changeMonitorId = setInterval(checkForChanges, checkIntervalMinutes * 60 * 1000);
     
     console.log(`👁️ Weather change monitoring started (checking every ${checkIntervalMinutes} minutes)`);
+    return true;
   }
 
   /**

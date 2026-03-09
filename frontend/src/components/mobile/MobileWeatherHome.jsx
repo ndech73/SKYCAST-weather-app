@@ -139,7 +139,11 @@ const MobileWeatherHome = () => {
         <div className="mobile-weather-details">
           <div className="mobile-detail-item">
             <WiWindy className="mobile-detail-icon" />
-            <div className="mobile-detail-value">{weatherData.wind_speed || 0} m/s</div>
+            <div className="mobile-detail-value">
+  {typeof weatherData.wind_speed === 'number' 
+    ? weatherData.wind_speed.toFixed(1) 
+    : (weatherData.windSpeed?.toFixed?.(1) || '0')} m/s
+</div>
             <div className="mobile-detail-label">Wind</div>
           </div>
           <div className="mobile-detail-item">

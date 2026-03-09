@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authUtils } from '../../utils/auth';
-import { 
+import { weatherAPI } from '../../scripts/weatherAPI';
+import notificationManager from '../../scripts/notificationManager';
+import { notify } from '../../events/notificationEvents';
+import {
   IoPersonOutline,
   IoNotificationsOutline,
   IoMoonOutline,
@@ -27,6 +30,7 @@ const MobileSettings = () => {
   const fileInputRef = useRef(null);
   const [userData, setUserData] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+  const [notificationStatus, setNotificationStatus] = useState('');
   
   const [settings, setSettings] = useState({
     // Notifications
@@ -53,6 +57,11 @@ const MobileSettings = () => {
     shareData: false,
   });
 
+  // Browser notification permission state
+  const [permissionStatus, setPermissionStatus] = useState(
+    'Notification' in window ? Notification.permission : 'denied'
+  );
+
   useEffect(() => {
     const user = authUtils.getUserData();
     setUserData(user);
@@ -60,7 +69,12 @@ const MobileSettings = () => {
     // Load saved settings from localStorage
     const savedSettings = localStorage.getItem('appSettings');
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      try {
+        const parsed = JSON.parse(savedSettings);
+        setSettings(parsed);
+      } catch (e) {
+        console.error('Failed to parse saved settings:', e);
+      }
     }
 
     // Load profile image
@@ -71,7 +85,27 @@ const MobileSettings = () => {
 
     // Apply theme
     applyTheme(settings.darkMode);
+
+    // Sync permission status
+    if ('Notification' in window) {
+      setPermissionStatus(Notification.permission);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      // Only cleanup if notifications are disabled
+      const currentSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+      if (!currentSettings.notifications) {
+        notificationManager.cleanup();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const showStatus = (message) => {
+    setNotificationStatus(message);
+    setTimeout(() => setNotificationStatus(''), 4000);
+  };
 
   const handleToggle = (setting) => {
     const newSettings = {
@@ -108,6 +142,147 @@ const MobileSettings = () => {
     localStorage.setItem('appSettings', JSON.stringify(newSettings));
   };
 
+  // ========== NOTIFICATION HANDLERS ==========
+
+  // Request browser notification permission
+  const requestNotificationPermission = async () => {
+    try {
+      const permission = await notificationManager.requestPermission();
+      setPermissionStatus(permission);
+
+      if (permission === 'granted') {
+        showStatus('✅ Browser notifications enabled!');
+      } else if (permission === 'denied') {
+        // Mobile browsers often deny — fall back to in-app
+        showStatus('ℹ️ Using in-app notifications instead (normal on mobile).');
+      } else {
+        showStatus('⚠️ Permission not yet granted.');
+      }
+    } catch (error) {
+      console.error('Error requesting permission:', error);
+      showStatus('ℹ️ Using in-app notifications instead.');
+    }
+  };
+
+  // Toggle push notifications — request permission + start/stop periodic updates
+  const handleNotificationsToggle = async () => {
+    const enabling = !settings.notifications;
+
+    // Update state & save
+    const newSettings = { ...settings, notifications: enabling };
+    setSettings(newSettings);
+    localStorage.setItem('appSettings', JSON.stringify(newSettings));
+
+    if (enabling) {
+      // Request permission if not already granted
+      if (permissionStatus !== 'granted') {
+        await requestNotificationPermission();
+      }
+
+      if (notificationManager.isEnabled()) {
+        const fetchWeather = async () => {
+          try {
+            const location = userData?.location || 'Nairobi';
+            return await weatherAPI.getCurrentWeather(location);
+          } catch (error) {
+            console.error('Error fetching weather for notification:', error);
+            return null;
+          }
+        };
+
+        notificationManager.startPeriodicNotifications(fetchWeather, 60);
+        showStatus('✅ Push notifications started (every 60 min)');
+      } else {
+        // Fallback: in-app notifications via event system
+        notify.success(
+          "You'll receive weather updates as in-app notifications. Tap 🔔 anytime for a quick update!",
+          '🔔 Notifications Enabled'
+        );
+        showStatus('✅ In-app notifications enabled (mobile mode)');
+      }
+    } else {
+      notificationManager.stopPeriodicNotifications();
+      showStatus('⏸️ Push notifications stopped.');
+    }
+  };
+
+  // Toggle weather alerts — start/stop change monitoring
+  const handleWeatherAlertsToggle = async () => {
+    const enabling = !settings.weatherAlerts;
+
+    const newSettings = { ...settings, weatherAlerts: enabling };
+    setSettings(newSettings);
+    localStorage.setItem('appSettings', JSON.stringify(newSettings));
+
+    if (enabling) {
+      if (permissionStatus !== 'granted') {
+        await requestNotificationPermission();
+      }
+
+      if (notificationManager.isEnabled()) {
+        const fetchWeather = async () => {
+          try {
+            const location = userData?.location || 'Nairobi';
+            return await weatherAPI.getCurrentWeather(location);
+          } catch (error) {
+            console.error('Error fetching weather for alert:', error);
+            return null;
+          }
+        };
+
+        notificationManager.startChangeMonitoring(fetchWeather, 15);
+        showStatus('✅ Weather alerts enabled (checking every 15 min)');
+      } else {
+        // Fallback for mobile
+        notify.success(
+          "Weather alerts active! You'll see alerts inside the app when conditions change.",
+          '⚠️ Weather Alerts Enabled'
+        );
+        showStatus('✅ In-app weather alerts enabled (mobile mode)');
+      }
+    } else {
+      notificationManager.stopChangeMonitoring();
+      showStatus('⏸️ Weather alerts disabled.');
+    }
+  };
+
+  // Toggle daily forecast — send a test notification immediately
+  const handleDailyForecastToggle = async () => {
+    const enabling = !settings.dailyForecast;
+
+    const newSettings = { ...settings, dailyForecast: enabling };
+    setSettings(newSettings);
+    localStorage.setItem('appSettings', JSON.stringify(newSettings));
+
+    if (enabling) {
+      if (permissionStatus !== 'granted') {
+        await requestNotificationPermission();
+      }
+
+      if (notificationManager.isEnabled()) {
+        // Send a test notification to confirm it works
+        try {
+          const location = userData?.location || 'Nairobi';
+          const weatherData = await weatherAPI.getCurrentWeather(location);
+          notificationManager.sendNotification(weatherData, 'update');
+          showStatus('✅ Daily forecast enabled! Test notification sent.');
+        } catch (error) {
+          showStatus('✅ Daily forecast enabled.');
+        }
+      } else {
+        notify.info(
+          "Daily summaries will appear inside the app on mobile.",
+          "📅 Daily Forecast Enabled"
+        );
+        showStatus('✅ In-app daily summaries enabled (mobile mode)');
+      }
+    } else {
+      showStatus('⏸️ Daily forecast disabled.');
+    }
+  };
+
+  // ========== END NOTIFICATION HANDLERS ==========
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -135,6 +310,7 @@ const MobileSettings = () => {
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
+      notificationManager.cleanup();
       authUtils.logout(navigate);
     }
   };
@@ -336,12 +512,69 @@ const MobileSettings = () => {
             <IoNotificationsOutline style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
             Notifications
           </h3>
+
+          {/* Permission status banner */}
+          <div className="mobile-setting-item" style={{ 
+            padding: '0.75rem 1rem', 
+            background: permissionStatus === 'granted' ? '#e6ffed' : '#fff3e6',
+            borderRadius: '8px',
+            marginBottom: '0.5rem',
+            border: `1px solid ${permissionStatus === 'granted' ? '#48bb78' : '#ed8936'}`
+          }}>
+            <div className="mobile-setting-info">
+              <div className="mobile-setting-label" style={{ fontSize: '0.85rem' }}>
+                Browser Permission: 
+                <span style={{ 
+                  fontWeight: 600, 
+                  marginLeft: '0.5rem',
+                  color: permissionStatus === 'granted' ? '#38a169' : '#dd6b20'
+                }}>
+                  {permissionStatus === 'granted' && '✅ Enabled'}
+                  {permissionStatus === 'denied' && '❌ Blocked'}
+                  {permissionStatus === 'default' && '⏳ Not set'}
+                </span>
+              </div>
+            </div>
+            {permissionStatus !== 'granted' && (
+              <button 
+                onClick={requestNotificationPermission}
+                style={{
+                  background: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '6px',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Enable
+              </button>
+            )}
+          </div>
+
+          {/* Notification status message */}
+          {notificationStatus && (
+            <div style={{
+              padding: '0.5rem 1rem',
+              background: '#667eea20',
+              borderRadius: '6px',
+              marginBottom: '0.5rem',
+              fontSize: '0.85rem',
+              textAlign: 'center',
+              color: '#667eea',
+              fontWeight: 500
+            }}>
+              {notificationStatus}
+            </div>
+          )}
           
           <div className="mobile-setting-item">
             <div className="mobile-setting-info">
               <div className="mobile-setting-label">Push Notifications</div>
               <div className="mobile-setting-description">
-                Receive weather updates
+                Receive weather updates every hour
               </div>
             </div>
             <label className="mobile-toggle">
@@ -349,7 +582,7 @@ const MobileSettings = () => {
                 type="checkbox"
                 className="mobile-toggle-input"
                 checked={settings.notifications}
-                onChange={() => handleToggle('notifications')}
+                onChange={handleNotificationsToggle}
               />
               <span className="mobile-toggle-slider"></span>
             </label>
@@ -362,7 +595,7 @@ const MobileSettings = () => {
                 Weather Alerts
               </div>
               <div className="mobile-setting-description">
-                Get notified about severe weather
+                Get notified about severe weather changes
               </div>
             </div>
             <label className="mobile-toggle">
@@ -370,7 +603,7 @@ const MobileSettings = () => {
                 type="checkbox"
                 className="mobile-toggle-input"
                 checked={settings.weatherAlerts}
-                onChange={() => handleToggle('weatherAlerts')}
+                onChange={handleWeatherAlertsToggle}
               />
               <span className="mobile-toggle-slider"></span>
             </label>
@@ -391,7 +624,7 @@ const MobileSettings = () => {
                 type="checkbox"
                 className="mobile-toggle-input"
                 checked={settings.dailyForecast}
-                onChange={() => handleToggle('dailyForecast')}
+                onChange={handleDailyForecastToggle}
               />
               <span className="mobile-toggle-slider"></span>
             </label>

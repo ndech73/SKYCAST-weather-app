@@ -68,6 +68,11 @@ const MobileFavorites = () => {
     }
   };
 
+  // Helper to get the city name from weather data regardless of property name
+  const getCityName = (weather) => {
+    return weather.city || weather.name || weather.location || 'Unknown';
+  };
+
   const removeFavorite = (index, cityName) => {
     if (confirm(`Remove ${cityName} from favorites?`)) {
       setFavorites(prev => prev.filter((_, i) => i !== index));
@@ -138,14 +143,14 @@ const MobileFavorites = () => {
           <div key={index} className="mobile-favorite-card">
             <button 
               className="mobile-remove-favorite"
-              onClick={() => removeFavorite(index, weather.location)}
+              onClick={() => removeFavorite(index, getCityName(weather))}
               aria-label="Remove favorite"
             >
               <IoCloseOutline />
             </button>
             
             <div className="mobile-favorite-header">
-              <h3 className="mobile-favorite-city">{weather.location}</h3>
+              <h3 className="mobile-favorite-city">{getCityName(weather)}</h3>
               <span className="mobile-favorite-icon">
                 {getWeatherIcon(weather.condition)}
               </span>
@@ -162,7 +167,11 @@ const MobileFavorites = () => {
             <div className="mobile-favorite-details">
               <div className="mobile-favorite-detail">
                 <WiWindy style={{ fontSize: '24px' }} />
-                <span>{weather.wind_speed || 0} m/s</span>
+               <span>
+  {typeof weather.wind_speed === 'number' 
+    ? weather.wind_speed.toFixed(1) 
+    : '0'} m/s
+</span>
               </div>
               <div className="mobile-favorite-detail">
                 <IoWaterOutline style={{ fontSize: '20px' }} />
