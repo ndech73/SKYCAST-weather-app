@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/authRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
+import pushRoutes from './routes/pushRoutes.js';  // ← ADD THIS LINE
 import { connectDB } from './config/db.js';
 
 import logger from './utils/logger.js';
@@ -38,7 +39,8 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
-      'http://127.0.0.1:5173'
+      'http://127.0.0.1:5173',
+      'http://192.168.0.102:5173'  // ← ADD YOUR LOCAL IP FOR MOBILE TESTING
     ];
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
@@ -64,6 +66,8 @@ app.use(helmet({
         "http://localhost:5173",
         "ws://localhost:5173",
         "http://localhost:3001",
+        "http://192.168.0.102:5173",  // ← ADD FOR MOBILE
+        "http://192.168.0.102:3001",  // ← ADD FOR MOBILE
         "https://api.openweathermap.org",
         "https://api.open-meteo.com"
       ],
@@ -96,7 +100,8 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
-    console.log(`📤 ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms`);
+    const emoji = res.statusCode < 400 ? '✅' : '❌';
+    console.log(`${emoji} ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms`);
   });
   next();
 });
@@ -150,6 +155,10 @@ app.get('/health', (req, res) => {
 // Main application routes - ORDER MATTERS!
 app.use('/api/auth', authRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/push', pushRoutes);  // ← ADD THIS LINE
+
+// Also mount subscribe/unsubscribe at root /api level for compatibility
+app.use('/api', pushRoutes);  // ← ADD THIS LINE (allows /api/subscribe to work)
 
 // API documentation
 app.get('/api/docs', (req, res) => {
@@ -162,12 +171,20 @@ app.get('/api/docs', (req, res) => {
       'POST /api/test-login': 'Test login endpoint',
       'POST /api/auth/login': 'User login',
       'POST /api/auth/register': 'User registration',
-      'GET /api/weather?lat=...&lon=...': 'Weather and air quality by coordinates (NEW)',
+      'GET /api/weather?lat=...&lon=...': 'Weather and air quality by coordinates',
       'GET /api/weather/current/:city': 'Current weather by city',
       'GET /api/weather/forecast/:city': 'Weather forecast',
       'GET /api/weather/grid': 'Global weather grid',
       'GET /api/weather/by-ip': 'Weather by IP location',
-      'GET /api/weather/historical/:city': 'Historical weather data'
+      'GET /api/weather/historical/:city': 'Historical weather data',
+      // Push notification endpoints
+      'GET /api/push/vapid-public-key': 'Get VAPID public key',
+      'POST /api/subscribe': 'Subscribe to push notifications',
+      'POST /api/unsubscribe': 'Unsubscribe from push notifications',
+      'POST /api/push/send': 'Send notification to specific user',
+      'POST /api/push/broadcast': 'Send notification to all users',
+      'POST /api/push/weather-alert': 'Send weather alert notification',
+      'GET /api/push/subscriptions': 'List all subscriptions (debug)'
     }
   });
 });
@@ -189,9 +206,6 @@ app.use(errorHandler);
 // Start server
 const PORT = process.env.PORT || 3001;
 
-// REMOVED THE EXTRA app.listen() CALL THAT WAS ON LINE 31
-// The correct server start is here at the end:
-
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log('========================================');
   console.log('🚀 SkyCast Backend Server');
@@ -200,6 +214,7 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🎯 Frontend: http://localhost:5173`);
   console.log(`📚 API Docs: http://localhost:${PORT}/api/docs`);
   console.log(`🌐 Listening on: 0.0.0.0:${PORT}`);
+  console.log(`🔔 Push notifications: ${process.env.VAPID_PUBLIC ? 'Enabled' : 'Disabled'}`);
   console.log('========================================');
 });
 
